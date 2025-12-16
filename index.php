@@ -483,7 +483,7 @@ include 'auth.php';
                                             if ($hasCategoryAccess && $firstPage):
                                         ?>
                                         <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                                            <a href="<?php echo strtolower(str_replace(' ', '-', $category['name'])) . '-tab.php?category_id=' . $category['id']; ?>" class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-center gp-tile-btn">
+                                            <a href="<?php echo strtolower(str_replace(' ', '-', $category['name'])) . '-tab.php?category_id=' . $category['id']; ?>" class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-start text-start gp-tile-btn">
                                                 <i class="<?php echo $category['icon']; ?> me-3 gp-tile-icon"></i> <?php echo $category['name']; ?>
                                             </a>
                                         </div>
