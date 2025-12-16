@@ -230,6 +230,22 @@ $item_id = 'TI/0' . ($lastId + 1);
                                                         class="form-control discount" placeholder="%" value="0">
                                                 </div>
                                             </div>
+                                            <!-- Location -->
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label" for="location_id">Location <span class="text-danger">*</span></label>
+                                                    <select id="location_id" name="location_id" class="form-select">
+                                                        <option value="">-- Select Location --</option>
+                                                        <?php
+                                                        $LOCATION = new LocationMaster(NULL);
+                                                        $locations = $LOCATION->getActiveLocation();
+                                                        foreach ($locations as $location) {
+                                                            echo "<option value='{$location['id']}'>{$location['name']}</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                             <!-- Invoice Price -->
                                             <div class="col-md-3">
                                                 <div class="mb-3">
