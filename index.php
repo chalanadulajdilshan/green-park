@@ -246,13 +246,13 @@ include 'auth.php';
                                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                                 border-left: 1px solid rgba(255, 255, 255, 0.05);
                             ">
-                                <div class="card-body p-4 p-md-5 position-relative">
+                                <div class="card-body p-3 p-md-4 position-relative">
                                     <!-- Welcome Image (positioned absolutely) -->
                                     <div class="position-absolute d-none d-lg-block" style="right: 0; top: 50%; transform: translateY(-50%); z-index: 1;">
                                         <div style="position: relative; animation: float 6s ease-in-out infinite;">
                                             <div style="
-                                                width: 140px;
-                                                height: 140px;
+                                                width: 120px;
+                                                height: 120px;
                                                 background: rgba(255,255,255,0.1);
                                                 border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
                                                 position: absolute;
@@ -265,6 +265,7 @@ include 'auth.php';
                                     </div>
                                     <div class="d-flex flex-column flex-md-row align-items-center">
                                         <div class="flex-shrink-0 me-4 mb-3 mb-md-0 position-relative">
+
                                             <div class="avatar-xxl position-relative">
                                                 <?php 
                                                 // Get the base URL - works for both local and live servers
@@ -285,8 +286,8 @@ include 'auth.php';
                                                 $profileImage .= '?v=' . time();
                                                 ?>
                                                 <div class="position-absolute" style="
-                                                    width: 100px;
-                                                    height: 100px;
+                                                    width: 82px;
+                                                    height: 82px;
                                                     background: rgba(255,255,255,0.15);
                                                     border-radius: 50%;
                                                     top: 50%;
@@ -296,8 +297,8 @@ include 'auth.php';
                                                     animation: pulse 2s infinite;
                                                 "></div>
                                                 <img src="<?php echo $profileImage; ?>" alt="Profile Picture" class="img-fluid rounded-circle position-relative" style="
-                                                    width: 90px;
-                                                    height: 90px;
+                                                    width: 74px;
+                                                    height: 74px;
                                                     object-fit: cover;
                                                     border: 3px solid rgba(255,255,255,0.9);
                                                     box-shadow: 0 6px 24px rgba(0,0,0,0.1);
@@ -307,9 +308,10 @@ include 'auth.php';
                                             </div>
                                         </div>
                                         <div class="flex-grow-1 text-center text-md-start">
-                                            <h2 class="mb-2" style="
+
+                                            <h2 class="mb-1" style="
                                                 font-weight: 700; 
-                                                font-size: 1.8rem; 
+                                                font-size: 1.6rem; 
                                                 background: linear-gradient(90deg, #ffffff, #e6f9ff);
                                                 -webkit-background-clip: text;
                                                 -webkit-text-fill-color: transparent;
@@ -330,7 +332,7 @@ include 'auth.php';
                                                     transition: transform 0.3s ease;
                                                 ">👋</span>
                                             </h2>
-                                            <p class="mb-3" style="font-size: 1.1rem; opacity: 0.9; max-width: 600px;">
+                                            <p class="mb-2" style="font-size: 1rem; opacity: 0.9; max-width: 600px;">
                                                 <?php 
                                                 // Set the default timezone to match your location (Asia/Colombo for Sri Lanka)
                                                 date_default_timezone_set('Asia/Colombo');
@@ -426,6 +428,75 @@ include 'auth.php';
                         </div>
                     </div>
                     <!-- end page title -->
+                    <!-- Main Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Quick Navigation</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <?php
+                                        $PAGE_CATEGORY = new PageCategory(NULL);
+                                        $USER_PERMISSION = new UserPermission();
+                                        $user_id = isset($_SESSION['id']) ? (int)$_SESSION['id'] : 0;
+                                        foreach ($PAGE_CATEGORY->getActiveCategory() as $category):
+                                            $hasCategoryAccess = false;
+                                            $firstPage = null;
+                                            $PAGES = new Pages(null);
+                                            if ($category['id'] == 1) { // Dashboard
+                                                $dashboardPages = $PAGES->getPagesByCategory($category['id']);
+                                                if (!empty($dashboardPages)) {
+                                                    $dashboardPage = $dashboardPages[0];
+                                                    $permissions = $USER_PERMISSION->hasPermission($user_id, $dashboardPage['id']);
+                                                    if (in_array(true, $permissions, true)) {
+                                                        $hasCategoryAccess = true;
+                                                        $firstPage = $dashboardPage;
+                                                    }
+                                                }
+                                            } elseif ($category['id'] == 4) { // Reports
+                                                // For reports, get the first subpage
+                                                $DEFAULT_DATA = new DefaultData();
+                                                foreach ($DEFAULT_DATA->pagesSubCategory() as $key => $subCategoryTitle) {
+                                                    $subPages = $PAGES->getPagesBySubCategory($key);
+                                                    foreach ($subPages as $page) {
+                                                        $permissions = $USER_PERMISSION->hasPermission($user_id, $page['id']);
+                                                        if (in_array(true, $permissions, true)) {
+                                                            $hasCategoryAccess = true;
+                                                            $firstPage = $page;
+                                                            break 2;
+                                                        }
+                                                    }
+                                                }
+                                            } else { // Other categories
+                                                $categoryPages = $PAGES->getPagesByCategory($category['id']);
+                                                foreach ($categoryPages as $page) {
+                                                    $permissions = $USER_PERMISSION->hasPermission($user_id, $page['id']);
+                                                    if (in_array(true, $permissions, true)) {
+                                                        $hasCategoryAccess = true;
+                                                        $firstPage = $page;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if ($hasCategoryAccess && $firstPage):
+                                        ?>
+                                        <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <a href="<?php echo strtolower(str_replace(' ', '-', $category['name'])) . '-tab.php?category_id=' . $category['id']; ?>" class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-center gp-tile-btn">
+                                                <i class="<?php echo $category['icon']; ?> me-3 gp-tile-icon"></i> <?php echo $category['name']; ?>
+                                            </a>
+                                        </div>
+                                        <?php
+                                            endif;
+                                        endforeach;
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Main Navigation -->
                     <?php
                     $ITEM_MASTER = new ItemMaster(NULL);
                     $MESSAGE = new Message(null);
@@ -462,86 +533,7 @@ include 'auth.php';
 
                     ?>
 
-                    <div class="row">
-                        <div class="col-md-6 col-xl-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="float-end mt-2">
-                                        <div id="tire-sales-chart"></div>
-                                    </div>
-                                    <div>
-                                        <h4 class="mb-1 mt-1">LKR <span data-plugin="counterup">128,450</span></h4>
-                                        <p class="text-muted mb-0">Total Tire Sales</p>
-                                    </div>
-                                    <p class="text-muted mt-3 mb-0">
-                                        <span class="text-success me-1">
-                                            <i class="mdi mdi-arrow-up-bold me-1"></i>5.2%
-                                        </span> this month
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Stock Availability -->
-                        <div class="col-md-6 col-xl-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="float-end mt-2">
-                                        <div id="stock-chart"></div>
-                                    </div>
-                                    <div>
-                                        <h4 class="mb-1 mt-1"><span data-plugin="counterup">2,450</span></h4>
-                                        <p class="text-muted mb-0">Tires in Stock</p>
-                                    </div>
-                                    <p class="text-muted mt-3 mb-0">
-                                        <span class="text-danger me-1">
-                                            <i class="mdi mdi-arrow-down-bold me-1"></i>3.1%
-                                        </span> from last week
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Suppliers -->
-                        <div class="col-md-6 col-xl-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="float-end mt-2">
-                                        <div id="suppliers-chart"></div>
-                                    </div>
-                                    <div>
-                                        <h4 class="mb-1 mt-1"><span data-plugin="counterup">18</span></h4>
-                                        <p class="text-muted mb-0">Active Suppliers</p>
-                                    </div>
-                                    <p class="text-muted mt-3 mb-0">
-                                        <span class="text-success me-1">
-                                            <i class="mdi mdi-arrow-up-bold me-1"></i>2 New
-                                        </span> this month
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Revenue Growth -->
-                        <div class="col-md-6 col-xl-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="float-end mt-2">
-                                        <div id="revenue-growth-chart"></div>
-                                    </div>
-                                    <div>
-                                        <h4 class="mb-1 mt-1">+ <span data-plugin="counterup">15.75</span>%</h4>
-                                        <p class="text-muted mb-0">Revenue Growth</p>
-                                    </div>
-                                    <p class="text-muted mt-3 mb-0">
-                                        <span class="text-success me-1">
-                                            <i class="mdi mdi-arrow-up-bold me-1"></i>12.4%
-                                        </span> vs last quarter
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
 
 
                     <!-- Bar Chart -->
