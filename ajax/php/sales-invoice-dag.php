@@ -114,6 +114,7 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->customer_id = $_POST['customer_id'];
     $SALES_INVOICE->customer_name = $_POST['customer_name'];
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
+    $SALES_INVOICE->customer_vehicle_no = $_POST['customer_vehicle_no'] ?? null;
     $SALES_INVOICE->customer_address = $_POST['customer_address'];
     $SALES_INVOICE->recommended_person = $_POST['recommended_person'];
     $SALES_INVOICE->department_id = $_POST['department_id'];

@@ -218,6 +218,7 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->customer_id = $_POST['customer_id'];
     $SALES_INVOICE->customer_name = ucwords(strtolower(trim($_POST['customer_name'])));
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
+    $SALES_INVOICE->customer_vehicle_no = $_POST['customer_vehicle_no'] ?? null;
     $SALES_INVOICE->customer_address = ucwords(strtolower(trim($_POST['customer_address'])));
     $SALES_INVOICE->recommended_person = isset($_POST['recommended_person']) ? ucwords(strtolower(trim($_POST['recommended_person']))) : null;
     $SALES_INVOICE->department_id = $_POST['department_id'];
@@ -439,6 +440,7 @@ if (isset($_POST['update'])) {
     $SALES_INVOICE->customer_id = $_POST['customer_id'];
     $SALES_INVOICE->customer_name = ucwords(strtolower(trim($_POST['customer_name'])));
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
+    $SALES_INVOICE->customer_vehicle_no = $_POST['customer_vehicle_no'] ?? null;
     $SALES_INVOICE->customer_address = ucwords(strtolower(trim($_POST['customer_address'])));
     $SALES_INVOICE->recommended_person = isset($_POST['recommended_person']) ? ucwords(strtolower(trim($_POST['recommended_person']))) : null;
 
@@ -481,6 +483,7 @@ if (isset($_POST['get_by_id'])) {
     $response['customer_name'] = $CUSTOMER_MASTER->name;
     $response['customer_address'] = $CUSTOMER_MASTER->address;
     $response['customer_mobile'] = $CUSTOMER_MASTER->mobile_number;
+    $response['customer_vehicle_no'] = $response['customer_vehicle_no'] ?? null;
     $response['recommended_person'] = $response['recommended_person'] ?? null;
 
     echo json_encode($response);
