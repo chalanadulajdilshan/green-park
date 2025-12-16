@@ -76,6 +76,8 @@ include_once(dirname(__FILE__) . '/SalesReturn.php');
 include_once(dirname(__FILE__) . '/SalesReturnItem.php');
 include_once(dirname(__FILE__) . '/Cashbook.php');
 include_once(dirname(__FILE__) . '/DailyIncome.php');
+include_once(dirname(__FILE__) . '/LocationMaster.php');
+
 
 session_start();
 function dd($data)
