@@ -31,6 +31,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_by_id') {
                 're_order_qty' => $row['re_order_qty'],
                 'stock_type' => $row['stock_type'],
                 'discount' => $row['discount'],
+                'location_id' => $row['location_id'],
                 'note' => $row['note'],
                 'status' => (int)$row['is_active']
             ];
@@ -72,6 +73,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_by_code') {
                 're_order_qty' => $row['re_order_qty'],
                 'stock_type' => $row['stock_type'],
                 'discount' => $row['discount'],
+                'location_id' => $row['location_id'],
                 'note' => $row['note'],
                 'status' => (int)$row['is_active']
             ];
@@ -116,6 +118,7 @@ if (isset($_POST['create'])) {
     $ITEM->stock_type = $_POST['stock_type'];
     $ITEM->note = $_POST['note'];
     $ITEM->discount = $_POST['discount'];
+    $ITEM->location_id = $_POST['location_id'];
     $ITEM->is_active = isset($_POST['is_active']) ? 1 : 0; //  
 
     // Attempt to create the item
@@ -182,6 +185,7 @@ if (isset($_POST['update'])) {
     $ITEM->list_price = $_POST['list_price'];
     $ITEM->invoice_price = $_POST['invoice_price'];
     $ITEM->discount = $_POST['discount'];
+    $ITEM->location_id = $_POST['location_id'];
     $ITEM->is_active = isset($_POST['is_active']) ? 1 : 0;
 
     // Attempt to update the item

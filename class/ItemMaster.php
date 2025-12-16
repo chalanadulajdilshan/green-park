@@ -19,6 +19,7 @@ class ItemMaster
     public $note;
     public $discount;
     public $is_active;
+    public $location_id;
 
     public function __construct($id = null)
     {
@@ -44,6 +45,7 @@ class ItemMaster
                 $this->note = $result['note'];
                 $this->discount = $result['discount'];
                 $this->is_active = $result['is_active'];
+                $this->location_id = $result['location_id'];
             }
         }
     }
@@ -52,11 +54,11 @@ class ItemMaster
     {
         $query = "INSERT INTO `item_master` (
     `code`, `name`, `brand`, `size`, `pattern`, `group`, `category`, 
-     `re_order_level`, `re_order_qty`, `stock_type`, `note`,`list_price`,`invoice_price`,`discount`, `is_active`
+     `re_order_level`, `re_order_qty`, `stock_type`, `note`,`list_price`,`invoice_price`,`discount`, `is_active`, `location_id`
 ) VALUES (
     '$this->code', '$this->name', '$this->brand', '$this->size', '$this->pattern', '$this->group',
     '$this->category',  '$this->re_order_level', '$this->re_order_qty',
-     '$this->stock_type', '$this->note', '$this->list_price', '$this->invoice_price', '$this->discount', '$this->is_active'
+     '$this->stock_type', '$this->note', '$this->list_price', '$this->invoice_price', '$this->discount', '$this->is_active', '$this->location_id'
 )";
 
 
@@ -88,7 +90,8 @@ class ItemMaster
             `stock_type` = '$this->stock_type', 
             `note` = '$this->note',
              `discount` = '$this->discount', 
-            `is_active` = '$this->is_active'
+            `is_active` = '$this->is_active',
+            `location_id` = '$this->location_id'
             WHERE `id` = '$this->id'";
 
 

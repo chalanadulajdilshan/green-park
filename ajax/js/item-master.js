@@ -130,6 +130,7 @@ jQuery(document).ready(function () {
         $('#discount').val(item.discount);
         $('#note').val(item.note);
         $('#is_active').prop('checked', item.status == 1);
+        $('#location_id').val(item.location_id).trigger('change');
 
         // Switch to update mode
         $('#create').hide();
