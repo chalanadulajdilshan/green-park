@@ -12,6 +12,7 @@ class SalesInvoice
     public $customer_id;
     public $customer_name;
     public $customer_mobile;
+    public $customer_vehicle_no;
     public $customer_address;
     public $recommended_person;
     public $department_id;
@@ -49,6 +50,7 @@ class SalesInvoice
                 $this->customer_id = $result['customer_id'];
                 $this->customer_name = $result['customer_name'];
                 $this->customer_mobile = $result['customer_mobile'];
+                $this->customer_vehicle_no = $result['customer_vehicle_no'] ?? null;
                 $this->customer_address = $result['customer_address'];
                 $this->recommended_person = $result['recommended_person'];
                 $this->department_id = $result['department_id'];
@@ -74,11 +76,11 @@ class SalesInvoice
     public function create()
     {
         $query = "INSERT INTO `sales_invoice` (
-            `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_address`, `recommended_person`, `department_id`, 
+            `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_vehicle_no`, `customer_address`, `recommended_person`, `department_id`, 
             `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, 
             `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`
         ) VALUES (
-            '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_address}', '{$this->recommended_person}', '{$this->department_id}', 
+            '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_vehicle_no}', '{$this->customer_address}', '{$this->recommended_person}', '{$this->department_id}', 
             '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', 
             '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}'
         )";
@@ -106,6 +108,7 @@ class SalesInvoice
             `customer_id` = '{$this->customer_id}', 
             `customer_name` = '{$this->customer_name}', 
             `customer_mobile` = '{$this->customer_mobile}', 
+            `customer_vehicle_no` = '{$this->customer_vehicle_no}', 
             `customer_address` = '{$this->customer_address}', 
             `recommended_person` = '{$this->recommended_person}', 
             `department_id` = '{$this->department_id}', 

@@ -211,7 +211,7 @@ include './auth.php';
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-2">
+                                            <div class="col-md-3">
                                                 <label for="customerAddress" class="form-label">Customer
                                                     Address</label>
                                                 <div class="input-group mb-3">
@@ -228,7 +228,15 @@ include './auth.php';
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
+                                                <label for="customerVehicleNo" class="form-label">Vehicle No</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="customer_vehicle_no" name="customer_vehicle_no" type="text"
+                                                        class="form-control" placeholder="Enter Vehicle No">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
                                                 <label for="recommendedPerson" class="form-label">Recommended Person</label>
                                                 <div class="input-group mb-3">
                                                     <input id="recommended_person" name="recommended_person" type="text"
