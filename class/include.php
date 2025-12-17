@@ -78,8 +78,11 @@ include_once(dirname(__FILE__) . '/Cashbook.php');
 include_once(dirname(__FILE__) . '/DailyIncome.php');
 include_once(dirname(__FILE__) . '/LocationMaster.php');
 
+// Initialize session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
 
-session_start();
 function dd($data)
 {
 
