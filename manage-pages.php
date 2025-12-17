@@ -147,8 +147,15 @@ include 'auth.php';
                                                 </div>
                                             </div>
 
+                                            <div class="col-md-2">
+                                                <label for="PageIcon" class="form-label">Page Icon</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="page_icon" name="page_icon" type="text"
+                                                        placeholder="e.g. uil uil-home" class="form-control">
+                                                </div>
+                                            </div>
 
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label for="PageUrl" class="form-label">Page Url</label>
                                                 <div class="input-group mb-3">
                                                     <input id="page_url" name="page_url" type="text"
@@ -195,6 +202,7 @@ include 'auth.php';
                                         <th>#</th>
                                         <th>Page Category</th>
                                         <th>Page Name</th>
+                                        <th>Icon</th>
                                         <th>Page Url</th>
                                     </tr>
                                 </thead>
@@ -209,11 +217,17 @@ include 'auth.php';
                                         <tr class="select-pages" data-id="<?php echo $page['id']; ?>"
                                             data-category="<?php echo htmlspecialchars($page['page_category']); ?>"
                                             data-name="<?php echo htmlspecialchars($page['page_name']); ?>"
+                                            data-icon="<?php echo htmlspecialchars(isset($page['page_icon']) ? $page['page_icon'] : ''); ?>"
                                             data-url="<?php echo htmlspecialchars($page['page_url']); ?>">
 
                                             <td><?php echo $key; ?></td>
                                             <td><?php echo htmlspecialchars($PAGE_CATEGORY->name); ?></td>
                                             <td><?php echo htmlspecialchars($page['page_name']); ?></td>
+                                            <td>
+                                                <?php if (!empty($page['page_icon'])): ?>
+                                                    <i class="<?php echo htmlspecialchars($page['page_icon']); ?>"></i>
+                                                <?php endif; ?>
+                                            </td>
                                             <td><?php echo htmlspecialchars($page['page_url']); ?></td>
 
                                         </tr>

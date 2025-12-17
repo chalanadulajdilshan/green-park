@@ -1,0 +1,5 @@
+*                   text=auto
+
+build/*             text -diff
+yarn.lock           text -diff
+package-lock.json   text -diff

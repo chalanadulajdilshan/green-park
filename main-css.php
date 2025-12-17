@@ -94,6 +94,7 @@ function adjustBrightness($hex, $steps)
 <link href="assets/css/icons.min.css" rel="stylesheet" type="text/css" />
 <!-- App Css-->
 <link href="assets/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
+<link href="assets/libs/Simple-Countdown-Periodic-Timer-Plugin-With-jQuery-SyoTimer/Simple-Countdown-Periodic-Timer-Plugin-With-jQuery-SyoTimer/resources/default.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
 
 <link href="assets/libs/sweetalert/sweetalert.css" rel="stylesheet" type="text/css" />

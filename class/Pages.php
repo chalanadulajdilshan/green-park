@@ -6,7 +6,23 @@ class Pages
     public $page_category;
     public $sub_page_category;
     public $page_name;
+    public $page_icon;
     public $page_url;
+
+    private static $HAS_PAGE_ICON_COLUMN = null;
+
+    private static function hasPageIconColumn()
+    {
+        if (self::$HAS_PAGE_ICON_COLUMN !== null) {
+            return self::$HAS_PAGE_ICON_COLUMN;
+        }
+
+        $db = Database::getInstance();
+        $result = $db->readQuery("SHOW COLUMNS FROM `pages` LIKE 'page_icon'");
+
+        self::$HAS_PAGE_ICON_COLUMN = ($result && mysqli_num_rows($result) > 0);
+        return self::$HAS_PAGE_ICON_COLUMN;
+    }
 
     // Constructor to initialize the Page object with an ID (fetch data from the DB)
     public function __construct($id = null)
@@ -21,6 +37,7 @@ class Pages
                 $this->page_category = $result['page_category'];
                 $this->sub_page_category = $result['sub_page_category'];
                 $this->page_name = $result['page_name'];
+                $this->page_icon = isset($result['page_icon']) ? $result['page_icon'] : null;
                 $this->page_url = $result['page_url'];
             }
         }
@@ -29,12 +46,25 @@ class Pages
     // Create a new page record in the database
     public function create()
     {
-        $query = "INSERT INTO `pages` (`page_category`,`sub_page_category`, `page_name`, `page_url`) VALUES (
-            '" . $this->page_category . "',
-             '" . $this->sub_page_category . "',
-            '" . $this->page_name . "',
-            '" . $this->page_url . "')";
         $db = Database::getInstance();
+
+        $columns = "`page_category`,`sub_page_category`, `page_name`";
+        $values = "'" . (int) $this->page_category . "',
+             '" . $db->escapeString($this->sub_page_category) . "',
+            '" . $db->escapeString($this->page_name) . "'";
+
+        if (self::hasPageIconColumn()) {
+            $columns .= ", `page_icon`";
+            $values .= ",
+            '" . $db->escapeString($this->page_icon) . "'";
+        }
+
+        $columns .= ", `page_url`";
+        $values .= ",
+            '" . $db->escapeString($this->page_url) . "'";
+
+        $query = "INSERT INTO `pages` ($columns) VALUES (
+            $values)";
         $result = $db->readQuery($query);
 
         if ($result) {
@@ -47,13 +77,21 @@ class Pages
     // Update an existing page record
     public function update()
     {
-        $query = "UPDATE `pages` SET 
-            `page_category` = '" . $this->page_category . "',
-            `sub_page_category` = '" . $this->sub_page_category . "',
-            `page_name` = '" . $this->page_name . "',
-            `page_url` = '" . $this->page_url . "'
-            WHERE `id` = " . (int) $this->id;
         $db = Database::getInstance();
+
+        $query = "UPDATE `pages` SET 
+            `page_category` = '" . (int) $this->page_category . "',
+            `sub_page_category` = '" . $db->escapeString($this->sub_page_category) . "',
+            `page_name` = '" . $db->escapeString($this->page_name) . "'";
+
+        if (self::hasPageIconColumn()) {
+            $query .= ",
+            `page_icon` = '" . $db->escapeString($this->page_icon) . "'";
+        }
+
+        $query .= ",
+            `page_url` = '" . $db->escapeString($this->page_url) . "'
+            WHERE `id` = " . (int) $this->id;
         $result = $db->readQuery($query);
 
         if ($result) {

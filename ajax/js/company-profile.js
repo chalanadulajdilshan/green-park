@@ -275,6 +275,7 @@ jQuery(document).ready(function () {
     $("#new").click(function (e) {
         e.preventDefault();
         $('#form-data')[0].reset();
+        $('#home_view_mode').val('both');
         $("#create").show();
     });
 
@@ -296,7 +297,9 @@ jQuery(document).ready(function () {
         $('#email').val($(this).data('email'));
         $('#vat_number').val($(this).data('vatnumber'));
         $('#company_code').val($(this).data('companycode')).prop('readonly', false);
+        $('#customer_id').val($(this).data('customerid'));
         $('#image_name').val($(this).data('image'));
+        $('#home_view_mode').val($(this).data('homeviewmode') || 'both');
 
         // Update logo preview
         var imagePath = $(this).data('image');
