@@ -3,6 +3,8 @@
 include 'class/include.php';
 include 'auth.php';
 
+$homeViewMode = $COMPANY_PROFILE_DETAILS->home_view_mode ?? 'both';
+
 ?>
 <html lang="en">
 
@@ -220,8 +222,7 @@ include 'auth.php';
     <!-- Begin page -->
     <div id="layout-wrapper">
 
-        <?php include 'navigation.php' ?>
-
+        <?php include 'navigation.php'; ?>
 
 
         <!-- ============================================================== -->
@@ -229,206 +230,52 @@ include 'auth.php';
         <!-- ============================================================== -->
         <div class="main-content">
 
+            <div class="main-content">
+
             <div class="page-content">
                 <div class="container-fluid">
-                    <!-- Modern Welcome Card -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="welcome-card" style="
-                                background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
-                                border-radius: 16px;
-                                overflow: hidden;
-                                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-                                color: #ffffff;
-                                position: relative;
-                                transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-                                border: none;
-                                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                                border-left: 1px solid rgba(255, 255, 255, 0.05);
-                            ">
-                                <div class="card-body p-3 p-md-4 position-relative">
-                                    <!-- Welcome Image (positioned absolutely) -->
-                                    <div class="position-absolute d-none d-lg-block" style="right: 0; top: 50%; transform: translateY(-50%); z-index: 1;">
-                                        <div style="position: relative; animation: float 6s ease-in-out infinite;">
-                                            <div style="
-                                                width: 120px;
-                                                height: 120px;
-                                                background: rgba(255,255,255,0.1);
-                                                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-                                                position: absolute;
-                                                top: -20px;
-                                                right: -20px;
-                                                animation: morph 8s ease-in-out infinite;
-                                            "></div>
-                                            <img src="assets/images/welcome.png" alt="Welcome Illustration" class="img-fluid position-relative" style="filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));">
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-column flex-md-row align-items-center">
-                                        <div class="flex-shrink-0 me-4 mb-3 mb-md-0 position-relative">
+                    <?php include 'partials/subscription-countdown/subscription-countdown.php'; ?>
+                    <?php
+                    $ITEM_MASTER = new ItemMaster(NULL);
+                    $MESSAGE = new Message(null);
 
-                                            <div class="avatar-xxl position-relative">
-                                                <?php 
-                                                // Get the base URL - works for both local and live servers
-                                                $isLocal = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
-                                                $base_path = $isLocal ? '/360-ERP/' : '/';
-                                                $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . $base_path;
-                                                
-                                                // Check if user has a profile image and it exists, otherwise use default
-                                                $defaultImage = $base_url . 'upload/users/8.jpg';
-                                                $profileImage = $defaultImage;
-                                                if (!empty($US->image_name)) {
-                                                    $image_path = ($isLocal ? 'upload/users/' : 'upload/users/') . $US->image_name;
-                                                    if (file_exists($image_path)) {
-                                                        $profileImage = $base_url . 'upload/users/' . $US->image_name;
-                                                    }
-                                                }
-                                                // Add a cache-busting parameter
-                                                $profileImage .= '?v=' . time();
-                                                ?>
-                                                <div class="position-absolute" style="
-                                                    width: 82px;
-                                                    height: 82px;
-                                                    background: rgba(255,255,255,0.15);
-                                                    border-radius: 50%;
-                                                    top: 50%;
-                                                    left: 50%;
-                                                    transform: translate(-50%, -50%);
-                                                    z-index: 0;
-                                                    animation: pulse 2s infinite;
-                                                "></div>
-                                                <img src="<?php echo $profileImage; ?>" alt="Profile Picture" class="img-fluid rounded-circle position-relative" style="
-                                                    width: 74px;
-                                                    height: 74px;
-                                                    object-fit: cover;
-                                                    border: 3px solid rgba(255,255,255,0.9);
-                                                    box-shadow: 0 6px 24px rgba(0,0,0,0.1);
-                                                    transition: all 0.3s ease;
-                                                    z-index: 1;
-                                                " onerror="this.onerror=null; this.src='<?php echo $defaultImage; ?>'" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                            </div>
-                                        </div>
-                                        <div class="flex-grow-1 text-center text-md-start">
+                    $reorderItems = $ITEM_MASTER->checkReorderLevel();
 
-                                            <h2 class="mb-1" style="
-                                                font-weight: 700; 
-                                                font-size: 1.6rem; 
-                                                background: linear-gradient(90deg, #ffffff, #e6f9ff);
-                                                -webkit-background-clip: text;
-                                                -webkit-text-fill-color: transparent;
-                                                text-shadow: 0 2px 8px rgba(26, 41, 128, 0.2);
-                                                position: relative;
-                                                display: inline-block;
-                                            ">
-                                                Welcome back, <span style="
-                                                    background: linear-gradient(90deg, #ffd700, #ffb700);
-                                                    -webkit-background-clip: text;
-                                                    -webkit-text-fill-color: transparent;
-                                                    text-shadow: 0 2px 8px rgba(255, 183, 0, 0.2);
-                                                    font-weight: 800;
-                                                "><?php echo htmlspecialchars($US->name); ?></span>! 
-                                                <span class="welcome-emoji" style="
-                                                    display: inline-block;
-                                                    transform: rotate(0deg);
-                                                    transition: transform 0.3s ease;
-                                                ">👋</span>
-                                            </h2>
-                                            <p class="mb-2" style="font-size: 1rem; opacity: 0.9; max-width: 600px;">
-                                                <?php 
-                                                // Set the default timezone to match your location (Asia/Colombo for Sri Lanka)
-                                                date_default_timezone_set('Asia/Colombo');
-                                                
-                                                $current_hour = (int)date('H');
-                                                $current_time = date('h:i A');
-                                                $greeting = '';
-                                                $icon = '';
-                                                
-                                                // Debug information (you can remove this after testing)
-                                                // echo "<!-- Debug: Current hour is $current_hour, Time: $current_time -->";
-                                                
-                                                if ($current_hour < 12) {
-                                                    $greeting = 'Good Morning';
-                                                    $icon = '☀️';
-                                                } elseif ($current_hour < 17) {
-                                                    $greeting = 'Good Afternoon';
-                                                    $icon = '🌤️';
-                                                } else {
-                                                    $greeting = 'Good Evening';
-                                                    $icon = '🌙';
-                                                }
-                                                
-                                                // Add animation to the greeting
-                                                echo "<span class='d-inline-flex align-items-center'>";
-                                                echo "<span class='greeting-icon me-2' style='display: inline-block; animation: bounce 2s infinite;'>$icon</span>";
-                                                echo "<span class='greeting-text'><span class='fw-medium'>$greeting!</span> Here's what's happening with your store today.</span>";
-                                                echo "</span>";
-                                                
-                                                // Add some CSS for the animation
-                                                echo "<style>";
-                                                echo "@keyframes bounce {";
-                                                echo "  0%, 100% { transform: translateY(0); }";
-                                                echo "  50% { transform: translateY(-3px); }";
-                                                echo "}";
-                                                echo "</style>";
-                                                ?>
-                                            </p>
-                                            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3">
-                                                <span class="badge" style="
-                                                    background: rgba(255,255,255,0.15);
-                                                    backdrop-filter: blur(5px);
-                                                    border: 1px solid rgba(255,255,255,0.2);
-                                                    font-size: 0.9rem;
-                                                    font-weight: 500;
-                                                    padding: 0.5rem 1rem;
-                                                    border-radius: 50px;
-                                                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                                                ">
-                                                    <i class="bx bx-calendar me-2"></i> <?php echo date('l, F j, Y'); ?>
-                                                </span>
-                                                <span class="badge" id="realtime-clock" style="
-                                                    background: rgba(255,255,255,0.15);
-                                                    backdrop-filter: blur(5px);
-                                                    border: 1px solid rgba(255,255,255,0.2);
-                                                    font-size: 0.9rem;
-                                                    font-weight: 500;
-                                                    padding: 0.5rem 1rem;
-                                                    border-radius: 50px;
-                                                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                                                ">
-                                                    <i class="bx bx-time me-2"></i> <span id="time-display"><?php echo date('h:i A'); ?></span>
-                                                </span>
-                                                <script>
-                                                    function updateClock() {
-                                                        const now = new Date();
-                                                        const timeString = now.toLocaleTimeString('en-US', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                            hour12: true
-                                                        });
-                                                        document.getElementById('time-display').textContent = timeString;
-                                                    }
-                                                    updateClock();
-                                                    setInterval(updateClock, 1000);
-                                                </script>
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                    
-                                    <div class="position-absolute" style="
-                                        bottom: -50px;
-                                        right: -50px;
-                                        width: 250px;
-                                        height: 250px;
-                                        background: rgba(255,255,255,0.05);
-                                        border-radius: 50%;
-                                    "></div>
-                                </div>
+                    if (!empty($reorderItems)) {
+                        $customMessages = [];
 
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end page title -->
-                    <!-- Main Navigation -->
+                        foreach ($reorderItems as $item) {
+                            $customMessages[] = "Reorder Alert: <strong>{$item['code']}</strong> - {$item['name']} is below reorder level.";
+                        }
+
+                        $MESSAGE->showCustomMessages($customMessages, 'danger');
+                    }
+
+                    // Due Date Notifications
+                    $db = Database::getInstance();
+                    $dueDateColumnCheck = $db->readQuery("SHOW COLUMNS FROM `sales_invoice` LIKE 'due_date'");
+                    $hasDueDateColumn = ($dueDateColumnCheck && mysqli_num_rows($dueDateColumnCheck) > 0);
+
+                    if ($hasDueDateColumn) {
+                        $query = "SELECT COUNT(*) as total FROM sales_invoice 
+                                  WHERE payment_type = 2 AND due_date IS NOT NULL 
+                                  AND due_date >= CURDATE() AND due_date <= DATE_ADD(CURDATE(), INTERVAL 2 DAY) 
+                                  AND is_cancel = 0";
+                        $result = $db->readQuery($query);
+                        if ($result) {
+                            $row = mysqli_fetch_assoc($result);
+                            $totalDueNotifications = $row['total'];
+                            if ($totalDueNotifications > 0) {
+                                $dueNotifications = ["<a href='customer-outstanding-report.php' class='alert-link'>View {$totalDueNotifications} upcoming due date(s) within 2 days</a>"];
+                                echo '<div id="due_date_notification">';
+                                $MESSAGE->showCustomMessages($dueNotifications, 'warning');
+                                echo '</div>';
+                            }
+                        }
+                    }
+
+                    ?>
+                    <?php if ($homeViewMode !== 'header') { ?>
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
@@ -496,7 +343,7 @@ include 'auth.php';
                             </div>
                         </div>
                     </div>
-                    <!-- End Main Navigation -->
+                    <?php } ?>
                     <?php
                     $ITEM_MASTER = new ItemMaster(NULL);
                     $MESSAGE = new Message(null);
@@ -532,30 +379,6 @@ include 'auth.php';
                     }
 
                     ?>
-
-                    
-
-
-                    <!-- Bar Chart -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Sales Overview</h4>
-                                    <p class="card-title-desc">Monthly sales performance</p>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-wrapper">
-                                        <div class="chart-grid" id="chart-grid"></div>
-                                        <div class="bar-container" id="bar-container">
-                                            <!-- Bars will be generated by JavaScript -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Bar Chart -->
                 </div> <!-- container-fluid -->
             </div>
             <!-- End Page-content -->
@@ -583,6 +406,9 @@ include 'auth.php';
 
     <!-- include main js  -->
     <?php include 'main-js.php' ?>
+
+    <script src="assets/libs/Simple-Countdown-Periodic-Timer-Plugin-With-jQuery-SyoTimer/Simple-Countdown-Periodic-Timer-Plugin-With-jQuery-SyoTimer/build/jquery.syotimer.min.js"></script>
+    <script src="partials/subscription-countdown/ajax/js/subscription-countdown.js"></script>
 
     <!-- Dashboard init -->
     <script src="assets/js/pages/dashboard.init.js"></script>

@@ -57,6 +57,15 @@ $item_id = 'TI/0' . ($lastId + 1);
                                 </a>
                             <?php endif; ?>
 
+                            <?php if ($PERMISSIONS['add_page']): ?>
+                                <a href="#" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#item_import_modal">
+                                    <i class="uil uil-upload me-1"></i> Import
+                                </a>
+                                <a href="ajax/php/item-master.php?action=download_item_import_template" class="btn btn-outline-secondary" target="_blank">
+                                    <i class="uil uil-file-download me-1"></i> Template
+                                </a>
+                            <?php endif; ?>
+
                             <?php if ($PERMISSIONS['delete_page']): ?>
                                 <a href="#" class="btn btn-danger delete-item">
                                     <i class="uil uil-trash-alt me-1"></i> Delete
@@ -311,6 +320,36 @@ $item_id = 'TI/0' . ($lastId + 1);
                     </div>
                 </div> <!-- container-fluid -->
             </div>
+
+            <div class="modal fade" id="item_import_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Import Items</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="item-import-form" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="item_import_file" class="form-label">Excel/CSV File</label>
+                                    <input class="form-control" type="file" id="item_import_file" name="excel_file" accept=".xlsx,.csv" />
+                                </div>
+                                <div class="alert alert-info mb-0">
+                                    <div class="mb-2"><strong>Required columns:</strong> name, brand, group, category, stock_type, list_price</div>
+                                    <div class="mb-0"><strong>Brand/Group/Category/Stock Type:</strong> you can use ID or exact name.</div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="item_import_submit">
+                                <i class="uil uil-upload me-1"></i> Import Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <?php include 'footer.php' ?>
 
         </div>

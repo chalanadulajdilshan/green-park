@@ -1,7 +1,52 @@
 <?php
-$COMPANY = new CompanyProfile(1); // Assuming company ID is 1, adjust if needed
+$companyId = 1;
+if (isset($COMPANY_PROFILE_DETAILS) && !empty($COMPANY_PROFILE_DETAILS->id)) {
+    $companyId = (int) $COMPANY_PROFILE_DETAILS->id;
+}
+
+$COMPANY = new CompanyProfile($companyId);
 $logoPath = !empty($COMPANY->image_name) ? 'uploads/company-logos/' . $COMPANY->image_name : 'assets/images/logo.png';
 $themeColor = !empty($COMPANY->theme) ? $COMPANY->theme : '#3b5de7';
+$homeViewMode = $COMPANY->home_view_mode ?? 'both';
+
+if ($homeViewMode === 'nav_buttons') {
+    $dashboardHref = 'index.php';
+    $userId = isset($_SESSION['id']) ? (int) $_SESSION['id'] : 0;
+    if ($userId > 0) {
+        $PAGES = new Pages(null);
+        $dashboardPages = $PAGES->getPagesByCategory(1);
+        $USER_PERMISSION = new UserPermission();
+        foreach ($dashboardPages as $page) {
+            $permissions = $USER_PERMISSION->hasPermission($userId, $page['id']);
+            if (in_array(true, $permissions, true)) {
+                $dashboardHref = $page['page_url'] . '?page_id=' . $page['id'];
+                break;
+            }
+        }
+    }
+    ?>
+    <style>
+        body[data-layout="horizontal"] .page-content {
+            margin-top: 0 !important;
+            padding-top: calc(1.25rem / 2) !important;
+        }
+
+        .page-content {
+            padding-top: calc(1.25rem / 2) !important;
+        }
+
+        .main-content .content {
+            margin-top: 0 !important;
+        }
+    </style>
+    <div class="container-fluid py-2">
+        <a href="<?php echo $dashboardHref; ?>" id="dashboard-back-btn" class="btn btn-primary">
+            <i class="uil uil-estate me-1"></i> Dashboard
+        </a>
+    </div>
+    <?php
+    return;
+}
 ?>
 
 <header id="page-topbar" style="background-color: <?php echo $themeColor; ?>">
@@ -197,7 +242,10 @@ $themeColor = !empty($COMPANY->theme) ? $COMPANY->theme : '#3b5de7';
                                                                 if (in_array(true, $permissions, true)): ?>
                                                                     <a class="dropdown-item"
                                                                         href="<?php echo $page['page_url'] . '?page_id=' . $page['id']; ?>">
-                                                                        - <?php echo $page['page_name']; ?>
+                                                                        <?php if (!empty($page['page_icon'])): ?>
+                                                                            <i class="<?php echo htmlspecialchars($page['page_icon']); ?> me-2"></i>
+                                                                        <?php endif; ?>
+                                                                        <?php echo $page['page_name']; ?>
                                                                     </a>
                                                             <?php endif;
                                                             endforeach; ?>
@@ -244,7 +292,10 @@ $themeColor = !empty($COMPANY->theme) ? $COMPANY->theme : '#3b5de7';
                                                         <div class="col-lg-3">
                                                             <a class="dropdown-item"
                                                                 href="<?php echo $page['page_url'] . '?page_id=' . $page['id']; ?>">
-                                                                - <?php echo $page['page_name']; ?>
+                                                                <?php if (!empty($page['page_icon'])): ?>
+                                                                    <i class="<?php echo htmlspecialchars($page['page_icon']); ?> me-2"></i>
+                                                                <?php endif; ?>
+                                                                <?php echo $page['page_name']; ?>
                                                             </a>
                                                         </div>
                                                 <?php endif;

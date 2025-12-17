@@ -55,7 +55,12 @@ if (!$pageCategory->id) {
                                         ?>
                                         <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
                                             <a href="<?php echo $page['page_url'] . '?page_id=' . $page['id']; ?>" class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-center gp-tile-btn">
-                                                <i class="uil uil-file me-3 gp-tile-icon"></i> <?php echo $page['page_name']; ?>
+                                                <?php if (!empty($page['page_icon'])): ?>
+                                                    <i class="<?php echo htmlspecialchars($page['page_icon']); ?> me-3 gp-tile-icon"></i>
+                                                <?php else: ?>
+                                                    <i class="uil uil-file me-3 gp-tile-icon"></i>
+                                                <?php endif; ?>
+                                                <?php echo $page['page_name']; ?>
                                             </a>
                                         </div>
                                         <?php

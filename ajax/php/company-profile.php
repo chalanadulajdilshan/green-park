@@ -90,7 +90,12 @@ if (isset($_POST['create']) || isset($_POST['update'])) {
     $COMPANY->is_vat = isset($_POST['is_vat']) ? 1 : 0;
     $COMPANY->vat_percentage = isset($_POST['vat_percentage']) ? (float)$_POST['vat_percentage'] : 0;
     $COMPANY->company_code = $_POST['company_code'] ?? '';
+    $COMPANY->customer_id = $_POST['customer_id'] ?? null;
     $COMPANY->theme = $_POST['theme'] ?? '#3b5de7';
+
+    $homeViewMode = $_POST['home_view_mode'] ?? 'both';
+    $homeViewMode = in_array($homeViewMode, ['header', 'nav_buttons', 'both'], true) ? $homeViewMode : 'both';
+    $COMPANY->home_view_mode = $homeViewMode;
 
     // Save to database
     $result = $isUpdate ? $COMPANY->update() : $COMPANY->create();
@@ -148,7 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'is_vat' => $company->is_vat,
                 'vat_number' => $company->vat_number,
                 'vat_percentage' => $company->vat_percentage,
-                'theme' => $company->theme ?? 'default'
+                'customer_id' => $company->customer_id,
+                'theme' => $company->theme ?? 'default',
+                'home_view_mode' => $company->home_view_mode ?? 'both'
             ]
         ];
     } else {

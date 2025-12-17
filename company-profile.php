@@ -114,7 +114,7 @@ include 'auth.php';
                                             autocomplete="off">
                                             <div class="row">
                                                 <!-- Company Code -->
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <label class="form-label" for="company_code">Company Code</label>
                                                     <div class="input-group mb-3">
                                                         <input id="company_code" name="company_code" type="text"
@@ -127,8 +127,15 @@ include 'auth.php';
                                                     </div>
                                                 </div>
 
+                                                <!-- Customer ID -->
+                                                <div class="col-md-2">
+                                                    <label for="customer_id" class="form-label">Customer ID</label>
+                                                    <input id="customer_id" name="customer_id" type="text" class="form-control"
+                                                        placeholder="Enter customer id">
+                                                </div>
+
                                                 <!-- Company Name -->
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <label for="name" class="form-label">Company Name</label>
                                                     <input id="name" name="name" type="text" class="form-control"
                                                         placeholder="Enter company name">
@@ -180,6 +187,16 @@ include 'auth.php';
                                                         <input type="color" class="form-control form-control-color" id="theme" name="theme" value="<?php echo $COMPANY_PROFILE_DETAILS->theme ?: '#3b5de7'; ?>">
                                                         <button type="button" class="btn btn-light" id="theme-reset">Reset</button>
                                                     </div>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="home_view_mode">Home View</label>
+                                                    <?php $homeViewMode = $COMPANY_PROFILE_DETAILS->home_view_mode ?? 'both'; ?>
+                                                    <select id="home_view_mode" name="home_view_mode" class="form-select">
+                                                        <option value="both" <?php echo $homeViewMode === 'both' ? 'selected' : ''; ?>>Header + Navigation Buttons</option>
+                                                        <option value="header" <?php echo $homeViewMode === 'header' ? 'selected' : ''; ?>>Header Only</option>
+                                                        <option value="nav_buttons" <?php echo $homeViewMode === 'nav_buttons' ? 'selected' : ''; ?>>Navigation Buttons Only</option>
+                                                    </select>
                                                 </div>
 
                                                 <!-- VAT Registered -->
