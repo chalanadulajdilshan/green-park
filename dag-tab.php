@@ -54,7 +54,7 @@ if (!$pageCategory->id) {
                                             if (in_array(true, $permissions, true)) {
                                         ?>
                                         <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                                            <a href="<?php echo $page['page_url'] . '?page_id=' . $page['id']; ?>" class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-center gp-tile-btn">
+                                            <a href="<?php echo $page['page_url'] . '?page_id=' . $page['id']; ?>" class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-start gp-tile-btn">
                                                 <?php if (!empty($page['page_icon'])): ?>
                                                     <i class="<?php echo htmlspecialchars($page['page_icon']); ?> me-3 gp-tile-icon"></i>
                                                 <?php else: ?>

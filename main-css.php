@@ -42,6 +42,15 @@ $themeColor = !empty($COMPANY_PROFILE->theme) ? $COMPANY_PROFILE->theme : '#3b5d
         background-color: #ffffff;
         box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
         transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+        text-align: left;
+    }
+
+    .gp-tile-btn.justify-content-center {
+        justify-content: flex-start !important;
+    }
+
+    .gp-tile-btn.text-center {
+        text-align: left !important;
     }
 
     .gp-tile-btn:hover,
