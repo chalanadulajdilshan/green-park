@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Subscription Countdown Partial
  * Displays a countdown banner when monthly payment is due within 10 days
@@ -26,6 +27,11 @@ if (isset($US) && !empty($US->image_name)) {
 }
 
 $profileImage .= '?v=' . time();
+
+// Get system down status from session
+$systemDownStatus = isset($_SESSION['system_down_status']) ? $_SESSION['system_down_status'] : null;
+$systemDownLastUpdated = isset($_SESSION['system_down_last_updated']) ? $_SESSION['system_down_last_updated'] : null;
+
 ?>
 
 <div class="row mb-4">
@@ -273,9 +279,11 @@ $profileImage .= '?v=' . time();
         0% {
             transform: translateY(0px);
         }
+
         50% {
             transform: translateY(-10px);
         }
+
         100% {
             transform: translateY(0px);
         }
@@ -285,9 +293,11 @@ $profileImage .= '?v=' . time();
         0% {
             border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
         }
+
         50% {
             border-radius: 58% 42% 35% 65% / 55% 50% 50% 45%;
         }
+
         100% {
             border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
         }
@@ -299,11 +309,13 @@ $profileImage .= '?v=' . time();
             transform: scale(1);
             box-shadow: 0 0 0 rgba(245, 54, 92, 0.0);
         }
+
         50% {
             opacity: 0.55;
             transform: scale(1.02);
             box-shadow: 0 0 25px rgba(245, 54, 92, 0.45);
         }
+
         100% {
             opacity: 1;
             transform: scale(1);
@@ -335,3 +347,14 @@ $profileImage .= '?v=' . time();
         }
     }
 </style>
+
+<script src="partials/subscription-countdown/ajax/js/system-down-status.js"></script>
+
+<script>
+    // Ensure jQuery is loaded before running system down status
+    if (typeof jQuery === 'undefined') {
+        console.warn('jQuery not loaded, system down status will not work');
+    } else {
+        // jQuery is available, the script will initialize automatically
+    }
+</script>

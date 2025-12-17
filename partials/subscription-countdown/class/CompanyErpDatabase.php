@@ -222,7 +222,7 @@ class CompanyErpDatabase
     public function getDaysUntilPayment($projectStartDate)
     {
         $nextDueDate = $this->getNextPaymentDueDate($projectStartDate);
-        
+
         if (!$nextDueDate) {
             return null;
         }
@@ -230,10 +230,26 @@ class CompanyErpDatabase
         $today = new DateTime();
         $today->setTime(0, 0, 0);
         $nextDueDate->setTime(0, 0, 0);
-        
+
         $interval = $today->diff($nextDueDate);
-        
+
         return $interval->days;
+    }
+
+    // Get system down status by customer ID
+    public function getSystemDownStatus($customerId)
+    {
+        $customerId = (int)$customerId;
+
+        $query = "SELECT `system_down` FROM `customer` WHERE `id` = {$customerId} LIMIT 1";
+        $result = $this->readQuery($query);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            return $row['system_down'] ?? null;
+        }
+
+        return null;
     }
 
     // Auto close connection when script ends
