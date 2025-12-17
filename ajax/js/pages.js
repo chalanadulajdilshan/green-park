@@ -163,7 +163,7 @@ jQuery(document).ready(function () {
     $("#page_id").val($(this).data("id"));
     $("#page_category").val($(this).data("category"));
     $("#page_name").val($(this).data("name"));
-    $("#page_icon").val($(this).data("icon"));
+    $("#page_icon").val($(this).data("pageicon"));
     $("#page_url").val($(this).data("url"));
 
     $("#create").hide();
