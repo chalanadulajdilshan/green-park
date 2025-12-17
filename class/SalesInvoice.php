@@ -502,13 +502,16 @@ class SalesInvoice
         $db = Database::getInstance();
         $keyword = $db->escapeString($keyword);
 
-        $query = "SELECT si.*, dm.name as department_name 
+        $query = "SELECT DISTINCT si.*, dm.name as department_name 
                   FROM `sales_invoice` si
                   LEFT JOIN `customer_master` c ON si.customer_id = c.id
                   LEFT JOIN `department_master` dm ON si.department_id = dm.id
+                  LEFT JOIN `sales_invoice_items` sii ON sii.invoice_id = si.id
                   WHERE si.invoice_no LIKE '%$keyword%'
                      OR c.name LIKE '%$keyword%'
                      OR dm.name LIKE '%$keyword%'
+                     OR si.customer_vehicle_no LIKE '%$keyword%'
+                     OR sii.vehicle_no LIKE '%$keyword%'
                   ORDER BY si.id DESC
                   LIMIT 50";
 
