@@ -10,7 +10,7 @@
                     <div class="col-12">
                         <!-- Search Bar -->
                         <div class="input-group mb-2">
-                            <input type="text" id="invoiceSearch" class="form-control" placeholder="Search invoice no / customer / department">
+                            <input type="text" id="invoiceSearch" class="form-control" placeholder="Search invoice no / customer / department / vehicle no">
                             <button class="btn btn-primary" id="searchBtn">Search</button>
                         </div>
 
