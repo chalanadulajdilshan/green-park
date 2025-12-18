@@ -9,8 +9,8 @@ $logoPath = !empty($COMPANY->image_name) ? 'uploads/company-logos/' . $COMPANY->
 $themeColor = !empty($COMPANY->theme) ? $COMPANY->theme : '#3b5de7';
 $homeViewMode = $COMPANY->home_view_mode ?? 'both';
 
-if ($homeViewMode === 'nav_buttons') {
-    $dashboardHref = 'index.php';
+$dashboardHref = 'index.php';
+if ($homeViewMode === 'nav_buttons' || $homeViewMode === 'header') {
     $userId = isset($_SESSION['id']) ? (int) $_SESSION['id'] : 0;
     if ($userId > 0) {
         $PAGES = new Pages(null);
@@ -24,30 +24,72 @@ if ($homeViewMode === 'nav_buttons') {
             }
         }
     }
-    ?>
-    <style>
-        body[data-layout="horizontal"] .page-content {
-            margin-top: 0 !important;
-            padding-top: calc(1.25rem / 2) !important;
-        }
-
-        .page-content {
-            padding-top: calc(1.25rem / 2) !important;
-        }
-
-        .main-content .content {
-            margin-top: 0 !important;
-        }
-    </style>
-    <div class="container-fluid py-2">
-        <a href="<?php echo $dashboardHref; ?>" id="dashboard-back-btn" class="btn btn-primary">
-            <i class="uil uil-estate me-1"></i> Dashboard
-        </a>
-    </div>
-    <?php
-    return;
 }
 ?>
+
+<?php if ($homeViewMode !== 'both') { ?>
+    <style>
+        #page-topbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+        }
+
+        #page-topbar .navbar-header {
+            height: 64px;
+            padding: 0 12px;
+        }
+
+        #page-topbar .navbar-brand-box.mt-3 {
+            margin-top: 0 !important;
+        }
+
+        #page-topbar .navbar-brand-box {
+            height: 64px;
+            display: flex;
+            align-items: center;
+        }
+
+        #page-topbar .logo-lg img {
+            height: 44px !important;
+        }
+
+        #page-topbar .logo-sm img {
+            height: 38px !important;
+        }
+
+        #page-topbar .d-flex.mt-20 {
+            margin-top: 0 !important;
+            align-items: center;
+        }
+
+        #dashboard-back-btn {
+            color: #fff;
+            height: 36px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.10);
+        }
+
+        #dashboard-back-btn:hover,
+        #dashboard-back-btn:focus {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        body[data-layout="horizontal"] .page-content {
+            margin-top: 0 !important;
+            padding-top: calc(64px + 1.25rem) !important;
+        }
+
+        @media (max-width: 991.98px) {
+            body[data-layout="horizontal"] .page-content {
+                margin-top: 0 !important;
+                padding-top: calc(64px + 1.25rem) !important;
+            }
+        }
+    </style>
+<?php } ?>
 
 <header id="page-topbar" style="background-color: <?php echo $themeColor; ?>">
     <div class="navbar-header">
@@ -72,11 +114,13 @@ if ($homeViewMode === 'nav_buttons') {
             </div>
 
             <!-- Responsive Menu Toggle -->
-            <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"
-                data-bs-toggle="collapse" data-bs-target="#topnav-menu-content"
-                style="color: white;">
-                <i class="fa fa-fw fa-bars"></i>
-            </button>
+            <?php if ($homeViewMode === 'both') { ?>
+                <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"
+                    data-bs-toggle="collapse" data-bs-target="#topnav-menu-content"
+                    style="color: white;">
+                    <i class="fa fa-fw fa-bars"></i>
+                </button>
+            <?php } ?>
         </div>
 
         <div class="d-flex mt-20">
@@ -98,6 +142,13 @@ if ($homeViewMode === 'nav_buttons') {
                     </form>
                 </div>
             </div>
+
+            <?php if ($homeViewMode === 'nav_buttons' || $homeViewMode === 'header') { ?>
+                <a href="<?php echo $dashboardHref; ?>" id="dashboard-back-btn" class="btn btn-sm d-flex align-items-center waves-effect" title="Dashboard" aria-label="Dashboard">
+                    <i class="uil uil-estate"></i>
+                    <span class="ms-1 d-none d-md-inline">Dashboard</span>
+                </a>
+            <?php } ?>
 
             <!-- Fullscreen -->
             <div class="dropdown d-none d-lg-inline-block ms-1">
@@ -151,6 +202,7 @@ if ($homeViewMode === 'nav_buttons') {
     </div>
 
     <!-- Navigation Menu -->
+    <?php if ($homeViewMode === 'both') { ?>
     <div class="container-fluid">
         <div class="topnav">
             <nav class="navbar navbar-light navbar-expand-lg topnav-menu">
@@ -312,4 +364,5 @@ if ($homeViewMode === 'nav_buttons') {
             </nav>
         </div>
     </div>
+    <?php } ?>
 </header>
