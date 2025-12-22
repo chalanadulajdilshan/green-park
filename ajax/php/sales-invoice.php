@@ -19,15 +19,15 @@ if (isset($_POST['action']) && $_POST['action'] == 'check_invoice_id') {
 // Handle duplicate invoice with document tracking update
 if (isset($_POST['action']) && $_POST['action'] == 'resolve_duplicate_invoice') {
     $payment_type = trim($_POST['payment_type']);
-    
+
     // Get company profile details
     $USER = new User($_SESSION['id']);
     $company_id = $USER->company_id;
     $COMPANY_PROFILE_DETAILS = new CompanyProfile($company_id);
-    
+
     $DOCUMENT_TRACKING = new DocumentTracking(1);
     $SALES_INVOICE = new SalesInvoice(NULL);
-    
+
     // Determine document type and get current ID
     if ($payment_type === '1') {
         $documentType = 'cash';
@@ -41,20 +41,20 @@ if (isset($_POST['action']) && $_POST['action'] == 'resolve_duplicate_invoice') 
         echo json_encode(['status' => 'error', 'message' => 'Invalid payment type']);
         exit();
     }
-    
+
     // Keep incrementing until we find a unique invoice number
     $maxAttempts = 100; // Prevent infinite loop
     $attempts = 0;
     $nextId = $currentId + 1;
     $invoice_id = '';
-    
+
     while ($attempts < $maxAttempts) {
         $invoiceNumber = str_pad($nextId, 4, '0', STR_PAD_LEFT);
         $invoice_id = $COMPANY_PROFILE_DETAILS->company_code . $prefix . $_SESSION['id'] . '/' . $invoiceNumber;
-        
+
         // Check if this invoice number exists
         $exists = $SALES_INVOICE->checkInvoiceIdExist($invoice_id);
-        
+
         if (!$exists) {
             // Found a unique number, update document tracking to nextId - 1
             // Because the normal invoice creation will increment by 1 again
@@ -66,16 +66,16 @@ if (isset($_POST['action']) && $_POST['action'] == 'resolve_duplicate_invoice') 
                             `updated_at` = NOW() 
                             WHERE `status` = 1";
             $db->readQuery($update_query);
-            
+
             echo json_encode(['status' => 'success', 'invoice_id' => $invoice_id]);
             exit();
         }
-        
+
         // This number exists, try the next one
         $nextId++;
         $attempts++;
     }
-    
+
     // If we get here, we couldn't find a unique number after many attempts
     echo json_encode(['status' => 'error', 'message' => 'Unable to generate unique invoice number after multiple attempts. Please contact administrator.']);
     exit();
@@ -200,9 +200,16 @@ if (isset($_POST['create'])) {
 
     // VAT calculation - only if company has VAT enabled
     $tax = 0;
-    if ($COMPANY_PROFILE->is_vat == 1) {
+    if (isset($_POST['is_vat_invoice']) && $_POST['is_vat_invoice'] == '1') {
+        $vat_percentage =  $COMPANY_PROFILE->vat_percentage;
+        if ($vat_percentage > 0) {
+            $tax = round(($netTotal * $vat_percentage) / 100, 2);
+        }
+    } elseif ($COMPANY_PROFILE->is_vat == 1) {
+        // Fallback to company profile if form data not provided
         $tax = round(($netTotal * $COMPANY_PROFILE->vat_percentage) / 100, 2);
     }
+
 
     // Grand total = net total + VAT
     $grandTotal = $netTotal + $tax;
@@ -218,7 +225,6 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->customer_id = $_POST['customer_id'];
     $SALES_INVOICE->customer_name = ucwords(strtolower(trim($_POST['customer_name'])));
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
-    $SALES_INVOICE->customer_vehicle_no = $_POST['customer_vehicle_no'] ?? null;
     $SALES_INVOICE->customer_address = ucwords(strtolower(trim($_POST['customer_address'])));
     $SALES_INVOICE->recommended_person = isset($_POST['recommended_person']) ? ucwords(strtolower(trim($_POST['recommended_person']))) : null;
     $SALES_INVOICE->department_id = $_POST['department_id'];
@@ -228,6 +234,7 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->payment_type = $paymentType;
     $SALES_INVOICE->sub_total = $totalSubTotal;
     $SALES_INVOICE->discount = $totalDiscount;
+    $SALES_INVOICE->is_vat = isset($_POST['is_vat']) ? $_POST['is_vat'] : 0;
     $SALES_INVOICE->tax = $tax;
     $SALES_INVOICE->grand_total = $grandTotal;
     $SALES_INVOICE->outstanding_settle_amount = $_POST['paidAmount'];
@@ -287,13 +294,13 @@ if (isset($_POST['create'])) {
             //GET ARN ID BY ARN NO FIRST
             $ARN_MASTER = new ArnMaster(NULL);
             $arn_id = $ARN_MASTER->getArnIdByArnNo($item['arn_no']);
-            
+
             // Get the correct department_id for this ARN before saving item
             $db = Database::getInstance();
             $deptQuery = "SELECT department_id FROM stock_item_tmp WHERE arn_id = '{$arn_id}' AND item_id = '{$item['item_id']}' LIMIT 1";
             $deptResult = $db->readQuery($deptQuery);
             $correctDepartmentId = $_POST['department_id']; // fallback to form department
-            
+
             if ($deptRow = mysqli_fetch_assoc($deptResult)) {
                 $correctDepartmentId = $deptRow['department_id'];
             }
@@ -440,7 +447,6 @@ if (isset($_POST['update'])) {
     $SALES_INVOICE->customer_id = $_POST['customer_id'];
     $SALES_INVOICE->customer_name = ucwords(strtolower(trim($_POST['customer_name'])));
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
-    $SALES_INVOICE->customer_vehicle_no = $_POST['customer_vehicle_no'] ?? null;
     $SALES_INVOICE->customer_address = ucwords(strtolower(trim($_POST['customer_address'])));
     $SALES_INVOICE->recommended_person = isset($_POST['recommended_person']) ? ucwords(strtolower(trim($_POST['recommended_person']))) : null;
 
@@ -482,8 +488,13 @@ if (isset($_POST['get_by_id'])) {
     $response['customer_code'] = $CUSTOMER_MASTER->code;
     $response['customer_name'] = $CUSTOMER_MASTER->name;
     $response['customer_address'] = $CUSTOMER_MASTER->address;
+    $response['customer_vat_no'] = $CUSTOMER_MASTER->vat_no;
     $response['customer_mobile'] = $CUSTOMER_MASTER->mobile_number;
-    $response['customer_vehicle_no'] = $response['customer_vehicle_no'] ?? null;
+
+    $response['vat_no'] = $CUSTOMER_MASTER->vat_no;
+
+
+
     $response['recommended_person'] = $response['recommended_person'] ?? null;
 
     echo json_encode($response);
@@ -563,11 +574,11 @@ if (isset($_POST['action']) && $_POST['action'] == 'cancel') {
 
 
         foreach ($items as $item) {
-            
+
             // Extract ARN ID and Department from item_name
             $arnId = null;
             $arnDepartmentId = $SALES_INVOICE->department_id; // fallback to invoice department
-            
+
             if (strpos($item['item_name'], '|ARN:') !== false) {
                 preg_match('/\|ARN:(\d+)\|DEPT:(\d+)/', $item['item_name'], $matches);
                 if (isset($matches[1]) && isset($matches[2])) {
@@ -575,10 +586,10 @@ if (isset($_POST['action']) && $_POST['action'] == 'cancel') {
                     $arnDepartmentId = (int)$matches[2];
                 }
             }
-            
+
             if ($item['item_code'] != 0) {
                 $STOCK_MASTER = new StockMaster(NULL);
-                
+
                 // Add quantity back to the ARN's original department, not invoice department
                 $currentQty = $STOCK_MASTER->getAvailableQuantity($arnDepartmentId, $item['item_code']);
                 $newQty = $currentQty + $item['quantity'];
@@ -604,15 +615,13 @@ if (isset($_POST['action']) && $_POST['action'] == 'cancel') {
                     $qtyToAdd = abs($item['quantity']);
                     $STOCK_ITEM_TMP->addBackQuantity($item['item_code'], $arnDepartmentId, $qtyToAdd);
                 }
-            
-            }else{
+            } else {
                 $SERVICE_ITEM = new ServiceItem($item['service_item_code']);
                 $currentQty = $SERVICE_ITEM->qty;
                 $newQty = $currentQty + $item['quantity'];
                 $SERVICE_ITEM->qty = $newQty;
                 $SERVICE_ITEM->update();
             }
-
         }
 
 
@@ -631,9 +640,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'cancel') {
         } else {
             echo json_encode(['status' => 'error']);
         }
-    }
-
-    else {
+    } else {
         // Handle cancellation failure with specific error message
         $errorMessage = 'Failed to cancel invoice';
         if (is_array($result) && isset($result['message'])) {

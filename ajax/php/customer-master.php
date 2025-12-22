@@ -9,17 +9,17 @@ if (isset($_POST['create'])) {
     // Check if mobile number already exists (check both mobile fields)
     $db = Database::getInstance();
     $conditions = [];
-    
+
     // Check primary mobile number
     $conditions[] = "mobile_number = '{$_POST['mobile_number']}'";
     $conditions[] = "mobile_number_2 = '{$_POST['mobile_number']}'";
-    
+
     // Check secondary mobile number if provided
     if (!empty($_POST['mobile_number_2'])) {
         $conditions[] = "mobile_number = '{$_POST['mobile_number_2']}'";
         $conditions[] = "mobile_number_2 = '{$_POST['mobile_number_2']}'";
     }
-    
+
     $conditionString = implode(' OR ', $conditions);
     $mobileCheck = "SELECT id FROM customer_master WHERE ($conditionString)";
     $existingCustomer = mysqli_fetch_assoc($db->readQuery($mobileCheck));
@@ -32,18 +32,19 @@ if (isset($_POST['create'])) {
     $CUSTOMER = new CustomerMaster(NULL); // New customer object
 
     $CUSTOMER->code = $_POST['code'];
-    $CUSTOMER->name = strtoupper($_POST['name']); 
+    $CUSTOMER->name = strtoupper($_POST['name']);
     $CUSTOMER->mobile_number = $_POST['mobile_number'];
     $CUSTOMER->mobile_number_2 = $_POST['mobile_number_2'];
     $CUSTOMER->email = $_POST['email'];
     $CUSTOMER->contact_person = strtoupper($_POST['contact_person']);
     $CUSTOMER->contact_person_number = $_POST['contact_person_number'];
     $CUSTOMER->credit_limit = $_POST['credit_limit'];
-    $CUSTOMER->outstanding = $_POST['outstanding'];   
+    $CUSTOMER->outstanding = $_POST['outstanding'];
     $CUSTOMER->old_outstanding = $_POST['old_outstanding'];
     $CUSTOMER->address = strtoupper($_POST['address']);
+    $CUSTOMER->vat_no = $_POST['vat_no'];
     $CUSTOMER->remark = $_POST['remark'];
-    $CUSTOMER->category = $_POST['category'];    
+    $CUSTOMER->category = $_POST['category'];
     $CUSTOMER->is_active = isset($_POST['is_active']) ? 1 : 0;
     $res = $CUSTOMER->create();
 
@@ -72,17 +73,17 @@ if (isset($_POST['create-invoice-customer'])) {
     // Check if mobile number already exists (check both mobile fields)
     $db = Database::getInstance();
     $conditions = [];
-    
+
     // Check primary mobile number
     $conditions[] = "mobile_number = '{$_POST['mobile_number']}'";
     $conditions[] = "mobile_number_2 = '{$_POST['mobile_number']}'";
-    
+
     // Check secondary mobile number if provided
     if (!empty($_POST['mobile_number_2'])) {
         $conditions[] = "mobile_number = '{$_POST['mobile_number_2']}'";
         $conditions[] = "mobile_number_2 = '{$_POST['mobile_number_2']}'";
     }
-    
+
     $conditionString = implode(' OR ', $conditions);
     $mobileCheck = "SELECT id FROM customer_master WHERE ($conditionString)";
     $existingCustomer = mysqli_fetch_assoc($db->readQuery($mobileCheck));
@@ -96,7 +97,6 @@ if (isset($_POST['create-invoice-customer'])) {
 
     $CUSTOMER->code = $_POST['code'];
     $CUSTOMER->name = strtoupper($_POST['name']);
-    $CUSTOMER->name_2 = isset($_POST['name_2']) ? strtoupper($_POST['name_2']) : null;
     $CUSTOMER->mobile_number = $_POST['mobile_number'];
     $CUSTOMER->address = strtoupper($_POST['address']);
     $res = $CUSTOMER->createInvoiceCustomer();
@@ -115,7 +115,7 @@ if (isset($_POST['create-invoice-customer'])) {
     if ($res) {
 
         $CUSTOMER = new CustomerMaster($res);
-        echo json_encode(["status" => "success", "customer_id" => $CUSTOMER->id, "customer_code" => $CUSTOMER->code, "customer_name" => trim(($CUSTOMER->name ?? '') . ' ' . ($CUSTOMER->name_2 ?? '')), "customer_name_2" => $CUSTOMER->name_2, "customer_address" => $CUSTOMER->address, "customer_mobile_number" => $CUSTOMER->mobile_number]);
+        echo json_encode(["status" => "success", "customer_id" => $CUSTOMER->id, "customer_code" => $CUSTOMER->code, "customer_name" => trim(($CUSTOMER->name ?? '') . ' ' . ($CUSTOMER->name_2 ?? '')), "customer_address" => $CUSTOMER->address, "customer_mobile_number" => $CUSTOMER->mobile_number]);
         exit();
     } else {
         echo json_encode(["status" => "error"]);
@@ -129,17 +129,17 @@ if (isset($_POST['update'])) {
     // Check if mobile numbers already exist (excluding current customer, check both mobile fields)
     $db = Database::getInstance();
     $conditions = [];
-    
+
     // Check primary mobile number
     $conditions[] = "mobile_number = '{$_POST['mobile_number']}'";
     $conditions[] = "mobile_number_2 = '{$_POST['mobile_number']}'";
-    
+
     // Check secondary mobile number if provided
     if (!empty($_POST['mobile_number_2'])) {
         $conditions[] = "mobile_number = '{$_POST['mobile_number_2']}'";
         $conditions[] = "mobile_number_2 = '{$_POST['mobile_number_2']}'";
     }
-    
+
     $conditionString = implode(' OR ', $conditions);
     $mobileCheck = "SELECT id FROM customer_master WHERE ($conditionString) AND id != '{$_POST['customer_id']}'";
     $existingCustomer = mysqli_fetch_assoc($db->readQuery($mobileCheck));
@@ -152,7 +152,7 @@ if (isset($_POST['update'])) {
     $CUSTOMER = new CustomerMaster($_POST['customer_id']); // Load customer by ID
 
     $CUSTOMER->code = $_POST['code'];
-    $CUSTOMER->name = strtoupper($_POST['name']); 
+    $CUSTOMER->name = strtoupper($_POST['name']);
     $CUSTOMER->mobile_number = $_POST['mobile_number'];
     $CUSTOMER->mobile_number_2 = $_POST['mobile_number_2'];
     $CUSTOMER->email = $_POST['email'];
@@ -163,6 +163,8 @@ if (isset($_POST['update'])) {
     $CUSTOMER->old_outstanding = $_POST['old_outstanding'];
     $CUSTOMER->address = strtoupper($_POST['address']);
     $CUSTOMER->remark = $_POST['remark'];
+
+    $CUSTOMER->vat_no = $_POST['vat_no'];
     $CUSTOMER->category = $_POST['category'];
     $CUSTOMER->is_active = isset($_POST['is_active']) ? 1 : 0;
 
@@ -285,6 +287,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_customers') {
     $orderColumn = isset($_POST['order'][0]['column']) ? intval($_POST['order'][0]['column']) : 2; // Default sort by name
     $orderDir = isset($_POST['order'][0]['dir']) ? $db->escapeString($_POST['order'][0]['dir']) : 'asc';
 
+    $is_vat = isset($_POST['is_vat']) ? intval($_POST['is_vat']) : 0;
+
+
     // Column mapping
     $columns = [
         0 => 'id',
@@ -372,8 +377,8 @@ if (isset($_POST['action']) && $_POST['action'] == 'get_first_customer') {
         "status" => "success",
         "customer_id" => $CUSTOMER->id,
         "customer_name" => trim(($CUSTOMER->name ?? '') . ' ' . ($CUSTOMER->name_2 ?? '')), // Combined name
-        "customer_name_2" => $CUSTOMER->name_2,
         "customer_code" => $CUSTOMER->code ?? '',
+        "vat_no" => $CUSTOMER->vat_no,
         "mobile_number" => $CUSTOMER->mobile_number,
         "customer_address" => $CUSTOMER->address,
         "email" => $CUSTOMER->email ?? ''
