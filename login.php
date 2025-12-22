@@ -141,8 +141,12 @@ if (!empty($activeCompany[0])) {
                                         <button class="btn btn-primary w-sm waves-effect waves-light" type="submit" id="login-button">Log In</button>
                                     </div>
 
-
                                 </form>
+                                <div class="mt-3 text-center">
+                                    <a href="live-stock-public.php" class="text-primary fw-semibold">
+                                        View Live Stock without logging in
+                                    </a>
+                                </div>
                             </div>
 
                         </div>
