@@ -227,6 +227,47 @@ include './auth.php';
                                                         class="form-control" placeholder="Enter Mobile Number">
                                                 </div>
                                             </div>
+                                            <div class="col-md-2">
+                                                <label for="isVatInvoice" class="form-label">VAT Invoice</label>
+                                                <div class="input-group mb-3">
+                                                    <div class="form-check form-switch mt-2">
+                                                        <input class="form-check-input" type="checkbox" id="is_vat_invoice" name="is_vat_invoice" value="1">
+                                                        <label class="form-check-label" for="is_vat_invoice">
+                                                            Apply VAT
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" hidden>
+                                                <label for="vatNo" class="form-label">VAT No</label>
+                                                <div class="input-group mb-3">
+                                                    <?php
+                                                    $COMPANY_PROFILE = new CompanyProfile(null);
+                                                    $active_company = $COMPANY_PROFILE->getActiveCompany();
+                                                    $vat_number = !empty($active_company) ? $active_company[0]['vat_number'] : '';
+                                                    $vat_percentage = !empty($active_company) ? $active_company[0]['vat_percentage'] : '';
+                                                    ?>
+                                                    <input id="vat_no" name="vat_no" type="text"
+                                                        class="form-control" value="<?php echo htmlspecialchars($vat_number); ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="customerVatNumber" class="form-label">Customer Vat Number</label>
+                                                <div class="input-group mb-3">
+                                                    <?php
+                                                    $customer_vat_no = '';
+                                                    if (!empty($_SESSION['customer_id'])) {
+                                                        $CUSTOMER_MASTER = new CustomerMaster($_SESSION['customer_id']);
+                                                        $customer_vat_no = $CUSTOMER_MASTER->vat_no ?? '';
+                                                    }
+                                                    ?>
+                                                    <input id="customer_vat_no" name="customer_vat_no" type="text"
+                                                        class="form-control" value="<?php echo htmlspecialchars($customer_vat_no); ?>" readonly>
+                                                </div>
+                                            </div>
+
+                                            <input type="hidden" id="vat_percentage" name="vat_percentage" value="<?php echo htmlspecialchars($vat_percentage); ?>" />
+
 
                                             <div class="col-md-2">
                                                 <label for="customerVehicleNo" class="form-label">Vehicle No</label>
@@ -621,7 +662,7 @@ include './auth.php';
 
                                             </div>
                                             <hr>
-                                            
+
 
                                         </div>
 

@@ -105,7 +105,7 @@ $customer_id = 'CM/' . $_SESSION['id'] . '/0' . ($lastId + 1);
                                                         to add items
                                                     </p>
                                                 </div>
-                                                
+
 
                                             </div>
 
@@ -204,6 +204,19 @@ $customer_id = 'CM/' . $_SESSION['id'] . '/0' . ($lastId + 1);
                                                     <label for="old_outstanding" class="form-label">Old Outstanding Balance</label>
                                                     <input id="old_outstanding" name="old_outstanding" type="text"
                                                         class="form-control" placeholder="Enter old outstanding balance">
+                                                </div>
+
+
+                                                <!-- VAT Details -->
+                                                <div class="col-md-3 ">
+                                                    <label for="vat_no" class="form-label">VAT No</label>
+                                                    <input id="vat_no" name="vat_no" type="text" class="form-control"
+                                                        placeholder="Enter VAT number">
+                                                </div>
+                                                <div class="col-md-4 hidden">
+                                                    <label for="svat_no" class="form-label">SVAT No</label>
+                                                    <input id="svat_no" name="svat_no" type="text" class="form-control"
+                                                        placeholder="Enter SVAT number">
                                                 </div>
 
                                                 <div class="col-md-1 mt-3 d-flex justify-content-center align-items-center">

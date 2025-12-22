@@ -103,8 +103,9 @@ jQuery(document).ready(function () {
         { data: "code", title: "Code" },
         { data: "name", title: "Name" },
         { data: "mobile_number", title: "Mobile Number" },
-        { data: "email", title: "Email" }, 
-        { data: "outstanding", title: "Outstanding" } 
+        { data: "email", title: "Email" },
+        { data: "vat_no", title: "VAT" },
+        { data: "outstanding", title: "Outstanding" },
       ],
       order: [[0, "desc"]],
       pageLength: 100,
@@ -119,6 +120,7 @@ jQuery(document).ready(function () {
         $("#customer_name").val(data.name);
         $("#customer_address").val(data.address);
         $("#customer_mobile").val(data.mobile_number);
+        $("#customer_vat_no").val(data.vat_no);
         $("#customerModal").modal("hide");
         $("#outstandingInvoiceAmount").val(data.outstanding);
 
@@ -192,13 +194,13 @@ jQuery(document).ready(function () {
       },
       columns: [
         { data: "id", title: "#ID" },
-            { data: "code", title: "Code" },
-            { data: "name", title: "Name" },
-            { data: "mobile_number", title: "Mobile" },
-            { data: "email", title: "Email" },
-            { data: "credit_limit", title: "Credit Limit" },
-            { data: "vat_no", title: "Is Vat" },
-            { data: "status_label", title: "Status" }
+        { data: "code", title: "Code" },
+        { data: "name", title: "Name" },
+        { data: "mobile_number", title: "Mobile" },
+        { data: "email", title: "Email" },
+        { data: "credit_limit", title: "Credit Limit" },
+        { data: "vat_no", title: "Is Vat" },
+        { data: "status_label", title: "Status" },
       ],
       order: [[0, "desc"]],
       pageLength: 100,
@@ -341,13 +343,13 @@ jQuery(document).ready(function () {
       },
       columns: [
         { data: "id", title: "#ID" },
-            { data: "code", title: "Code" },
-            { data: "name", title: "Name" },
-            { data: "mobile_number", title: "Mobile" },
-            { data: "email", title: "Email" },
-            { data: "credit_limit", title: "Credit Limit" },
-            { data: "vat_no", title: "Is Vat" },
-            { data: "status_label", title: "Status" }
+        { data: "code", title: "Code" },
+        { data: "name", title: "Name" },
+        { data: "mobile_number", title: "Mobile" },
+        { data: "email", title: "Email" },
+        { data: "credit_limit", title: "Credit Limit" },
+        { data: "vat_no", title: "Is Vat" },
+        { data: "status_label", title: "Status" },
       ],
       order: [[0, "desc"]],
       pageLength: 100,
@@ -551,13 +553,12 @@ jQuery(document).ready(function () {
                             <tr>
                                 <td>${item.item_code_name}</td>
                                 <td>${item.item_name}</td>
-                                <td>${parseFloat(item.list_price || item.price).toLocaleString(
-                                  undefined,
-                                  {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  }
-                                )}</td>
+                                <td>${parseFloat(
+                                  item.list_price || item.price
+                                ).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}</td>
                                 <td>${item.quantity}</td>
                                 <td>${discountValue}</td>
                                 <td>${parseFloat(item.price).toLocaleString(
@@ -610,8 +611,6 @@ jQuery(document).ready(function () {
       },
       dataType: "json",
       success: function (response) {
-       
-
         // Close the modal first
         $("#invoiceModal").modal("hide");
 
@@ -645,7 +644,10 @@ jQuery(document).ready(function () {
         $("#customer_name").val(response.customer_name || "");
         $("#customer_address").val(response.customer_address || "");
         $("#customer_mobile").val(response.customer_mobile || "");
-        $("#customer_vehicle_no").val(response.customer_vehicle_no || "");
+
+        // Set VAT information
+        $("#customer_vat_no").val(response.vat_no || "");
+        $("#is_vat_invoice").prop("checked", response.is_vat == 1);
 
         // Set other fields
         $("#vat_type")
@@ -661,12 +663,18 @@ jQuery(document).ready(function () {
         if (response.payment_type == 2) {
           // Credit payment - show payment section with data
           $("#paymentSection").show();
-          $("#paidAmount").val(parseFloat(response.outstanding_settle_amount || 0).toFixed(2));
-          const balanceAmount = parseFloat(response.grand_total || 0) - parseFloat(response.outstanding_settle_amount || 0);
+          $("#paidAmount").val(
+            parseFloat(response.outstanding_settle_amount || 0).toFixed(2)
+          );
+          const balanceAmount =
+            parseFloat(response.grand_total || 0) -
+            parseFloat(response.outstanding_settle_amount || 0);
           $("#balanceAmount").val(balanceAmount.toFixed(2));
-          
+
           // Set credit period if available
-          $("#credit_period").val(response.credit_period || "").trigger("change");
+          $("#credit_period")
+            .val(response.credit_period || "")
+            .trigger("change");
         } else {
           // Cash payment - hide payment section and clear credit period
           $("#paymentSection").hide();

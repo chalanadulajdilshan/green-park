@@ -12,10 +12,12 @@ class CustomerMaster
     public $contact_person;
     public $contact_person_number;
     public $credit_limit;
-    public $outstanding; 
-    public $old_outstanding; 
-    public $category; 
-    public $remark;  
+    public $is_vat;
+    public $vat_no;
+    public $outstanding;
+    public $old_outstanding;
+    public $category;
+    public $remark;
     public $is_active;
 
     // Constructor
@@ -39,10 +41,10 @@ class CustomerMaster
     {
         $query = "INSERT INTO `customer_master` (
                     `code`, `name`, `address`, `mobile_number`, `mobile_number_2`, `email`, 
-                    `contact_person`, `contact_person_number`, `credit_limit`, `outstanding`, `old_outstanding`, `category`, `remark`, `is_active`
+                    `contact_person`, `contact_person_number`, `credit_limit`, `is_vat`, `vat_no`, `outstanding`, `old_outstanding`, `category`, `remark`, `is_active`
                 ) VALUES (
                     '{$this->code}', '{$this->name}', '{$this->address}', '{$this->mobile_number}', '{$this->mobile_number_2}', '{$this->email}',
-                    '{$this->contact_person}', '{$this->contact_person_number}', '{$this->credit_limit}', '{$this->outstanding}', '{$this->old_outstanding}', '{$this->category}', '{$this->remark}', '{$this->is_active}'
+                    '{$this->contact_person}', '{$this->contact_person_number}', '{$this->credit_limit}', '{$this->is_vat}', '{$this->vat_no}', '{$this->outstanding}', '{$this->old_outstanding}', '{$this->category}', '{$this->remark}', '{$this->is_active}'
                 )";
         $db = Database::getInstance();
         $result = $db->readQuery($query);
@@ -95,6 +97,8 @@ class CustomerMaster
                     `credit_limit` = '{$this->credit_limit}', 
                     `outstanding` = '{$this->outstanding}', 
                     `old_outstanding` = '{$this->old_outstanding}', 
+                     `is_vat`='{$this->is_vat}',
+                      `vat_no`='{$this->vat_no}', 
                     `category` = '{$this->category}', 
                     `remark` = '{$this->remark}', 
                     `is_active` = '{$this->is_active}' 
@@ -212,6 +216,8 @@ class CustomerMaster
                 "credit_limit" => number_format($row['credit_limit'], 2),
                 "outstanding" => number_format($row['outstanding'], 2),
                 "old_outstanding" => number_format($row['old_outstanding'], 2),
+                "is_vat" => $row['is_vat'],
+                "vat_no" => $row['vat_no'],
                 "category_id" => $row['category'],
                 "category" => $CATEGORY->name,
                 "remark" => $row['remark'],
@@ -220,8 +226,7 @@ class CustomerMaster
                     ? '<span class="badge bg-soft-success font-size-12">Active</span>'
                     : '<span class="badge bg-soft-danger font-size-12">Inactive</span>',
                 "province" => $PROVINCE->name,
-                "district" => $DISTRICT->name,
-                "vat_no" => $row['vat_no']
+                "district" => $DISTRICT->name
             ];
 
             $data[] = $nestedData;

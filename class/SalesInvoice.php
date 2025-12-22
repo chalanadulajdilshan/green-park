@@ -12,7 +12,6 @@ class SalesInvoice
     public $customer_id;
     public $customer_name;
     public $customer_mobile;
-    public $customer_vehicle_no;
     public $customer_address;
     public $recommended_person;
     public $department_id;
@@ -22,6 +21,7 @@ class SalesInvoice
     public $payment_type;
     public $sub_total;
     public $discount;
+    public  $is_vat;
     public $tax;
     public $grand_total;
     public $outstanding_settle_amount;
@@ -50,7 +50,6 @@ class SalesInvoice
                 $this->customer_id = $result['customer_id'];
                 $this->customer_name = $result['customer_name'];
                 $this->customer_mobile = $result['customer_mobile'];
-                $this->customer_vehicle_no = $result['customer_vehicle_no'] ?? null;
                 $this->customer_address = $result['customer_address'];
                 $this->recommended_person = $result['recommended_person'];
                 $this->department_id = $result['department_id'];
@@ -60,6 +59,7 @@ class SalesInvoice
                 $this->payment_type = $result['payment_type'];
                 $this->sub_total = $result['sub_total'];
                 $this->discount = $result['discount'];
+                $this->is_vat = $result['is_vat'];
                 $this->tax = $result['tax'];
                 $this->grand_total = $result['grand_total'];
                 $this->outstanding_settle_amount = $result['outstanding_settle_amount'];
@@ -76,12 +76,12 @@ class SalesInvoice
     public function create()
     {
         $query = "INSERT INTO `sales_invoice` (
-            `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_vehicle_no`, `customer_address`, `recommended_person`, `department_id`, 
-            `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, 
+            `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_address`, `recommended_person`, `department_id`, 
+            `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, `is_vat`,
             `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`
         ) VALUES (
-            '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_vehicle_no}', '{$this->customer_address}', '{$this->recommended_person}', '{$this->department_id}', 
-            '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', 
+            '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_address}', '{$this->recommended_person}', '{$this->department_id}', 
+            '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', '{$this->is_vat}',
             '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}'
         )";
 
@@ -108,7 +108,6 @@ class SalesInvoice
             `customer_id` = '{$this->customer_id}', 
             `customer_name` = '{$this->customer_name}', 
             `customer_mobile` = '{$this->customer_mobile}', 
-            `customer_vehicle_no` = '{$this->customer_vehicle_no}', 
             `customer_address` = '{$this->customer_address}', 
             `recommended_person` = '{$this->recommended_person}', 
             `department_id` = '{$this->department_id}', 
@@ -117,6 +116,7 @@ class SalesInvoice
             `payment_type` = '{$this->payment_type}', 
             `sub_total` = '{$this->sub_total}', 
             `discount` = '{$this->discount}', 
+            `is_vat` = '{$this->is_vat}', 
             `tax` = '{$this->tax}', 
             `grand_total` = '{$this->grand_total}', 
             `remark` = '{$this->remark}' 
@@ -145,7 +145,7 @@ class SalesInvoice
         $db = Database::getInstance();
         $result = $db->readQuery($query); // Assuming your Database class supports parameters
 
-         if ($result) {
+        if ($result) {
             return ['success' => true, 'message' => 'Invoice cancelled successfully'];
         } else {
             return ['success' => false, 'reason' => 'database_error', 'message' => 'Database error occurred while cancelling invoice'];
@@ -159,12 +159,12 @@ class SalesInvoice
         $query = "SELECT COUNT(*) as return_count FROM `sales_return` WHERE `invoice_id` = {$this->id}";
         $db = Database::getInstance();
         $result = mysqli_fetch_array($db->readQuery($query));
-        
+
         $is_return = ($result['return_count'] > 0) ? 1 : 0;
-        
+
         $update_query = "UPDATE `sales_invoice` SET `is_return` = {$is_return} WHERE `id` = {$this->id}";
         $db->readQuery($update_query);
-        
+
         $this->is_return = $is_return;
         return true;
     }
@@ -173,11 +173,11 @@ class SalesInvoice
     public function isInvoicePartiallyPaid($invoiceId = null)
     {
         $id = $invoiceId ?: $this->id;
-        
+
         $query = "SELECT COUNT(*) as payment_count FROM `payment_receipt_method` WHERE `invoice_id` = {$id}";
         $db = Database::getInstance();
         $result = mysqli_fetch_array($db->readQuery($query));
-        
+
         return ($result['payment_count'] > 0);
     }
 
@@ -502,16 +502,13 @@ class SalesInvoice
         $db = Database::getInstance();
         $keyword = $db->escapeString($keyword);
 
-        $query = "SELECT DISTINCT si.*, dm.name as department_name 
+        $query = "SELECT si.*, dm.name as department_name 
                   FROM `sales_invoice` si
                   LEFT JOIN `customer_master` c ON si.customer_id = c.id
                   LEFT JOIN `department_master` dm ON si.department_id = dm.id
-                  LEFT JOIN `sales_invoice_items` sii ON sii.invoice_id = si.id
                   WHERE si.invoice_no LIKE '%$keyword%'
                      OR c.name LIKE '%$keyword%'
                      OR dm.name LIKE '%$keyword%'
-                     OR si.customer_vehicle_no LIKE '%$keyword%'
-                     OR sii.vehicle_no LIKE '%$keyword%'
                   ORDER BY si.id DESC
                   LIMIT 50";
 
