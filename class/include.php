@@ -77,6 +77,8 @@ include_once(dirname(__FILE__) . '/SalesReturnItem.php');
 include_once(dirname(__FILE__) . '/Cashbook.php');
 include_once(dirname(__FILE__) . '/DailyIncome.php');
 include_once(dirname(__FILE__) . '/LocationMaster.php');
+include_once(dirname(__FILE__) . '/ServiceType.php');
+include_once(dirname(__FILE__) . '/VehicleService.php');
 
 // Initialize session if not already started
 if (session_status() === PHP_SESSION_NONE) {
