@@ -238,12 +238,11 @@ $APPOINTMENT = new ServiceAppointment();
     </style>
 </head>
 
-<body data-topbar="light" data-sidebar="dark">
+<body data-layout="horizontal" data-topbar="colored" class="someBlock">
 
     <div id="layout-wrapper">
 
-        <?php include 'nav-bar.php' ?>
-        <?php include 'side-bar.php' ?>
+        <?php include 'navigation.php' ?>
 
         <div class="main-content">
             <div class="page-content">
