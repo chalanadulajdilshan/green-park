@@ -85,6 +85,18 @@ if (isset($_POST['update_stage'])) {
     $stage = (int)$_POST['stage'];
     $notes = $_POST['notes'] ?? '';
     
+    // Block manual switch to Delivered (stage 7) - only through payment
+    if ($stage == 7) {
+        echo json_encode(["status" => 'error', "message" => 'Delivered status can only be set through payment']);
+        exit();
+    }
+    
+    // Block if already delivered
+    if ($SERVICE->current_stage == 7 || $SERVICE->status == 'delivered') {
+        echo json_encode(["status" => 'error', "message" => 'This service has already been delivered']);
+        exit();
+    }
+    
     $result = $SERVICE->updateStage($stage, $notes);
 
     if ($result) {
@@ -170,6 +182,54 @@ if (isset($_GET['get_service'])) {
                 "jobs" => $jobs,
                 "logs" => $logs,
                 "total_amount" => number_format($SERVICE->getTotalAmount(), 2)
+            ]
+        ]);
+    } else {
+        echo json_encode(["status" => 'error', "message" => 'Service not found']);
+    }
+    exit();
+}
+
+// Lookup Service by code or tracking code (for invoice)
+if (isset($_GET['service_lookup'])) {
+    $db = Database::getInstance();
+    $lookup = $db->escapeString($_GET['service_lookup']);
+
+    $query = "SELECT vs.*, vb.name as brand_name, vm.name as model_name 
+              FROM `vehicle_service` vs
+              LEFT JOIN `vehicle_brand` vb ON vs.vehicle_brand_id = vb.id 
+              LEFT JOIN `vehicle_model` vm ON vs.vehicle_model_id = vm.id 
+              WHERE vs.code = '$lookup' OR vs.tracking_code = '$lookup' LIMIT 1";
+
+    $result = mysqli_fetch_assoc($db->readQuery($query));
+
+    if ($result) {
+        // Check if already delivered
+        if ($result['current_stage'] == 7 || $result['status'] == 'delivered') {
+            echo json_encode(["status" => 'error', "message" => 'This service has already been delivered and paid']);
+            exit();
+        }
+        
+        $SERVICE = new VehicleService($result['id']);
+        $jobs = $SERVICE->getServiceJobs();
+
+        echo json_encode([
+            "status" => 'success',
+            "data" => [
+                "id" => $SERVICE->id,
+                "code" => $SERVICE->code,
+                "tracking_code" => $SERVICE->tracking_code,
+                "customer_name" => $SERVICE->customer_name,
+                "customer_address" => $SERVICE->customer_address,
+                "customer_phone" => $SERVICE->customer_phone,
+                "vehicle_no" => $SERVICE->vehicle_no,
+                "brand_name" => $result['brand_name'] ?? '',
+                "model_name" => $result['model_name'] ?? '',
+                "created_at" => $SERVICE->created_at,
+                "current_stage" => $result['current_stage'],
+                "status" => $result['status'],
+                "jobs" => $jobs,
+                "total_amount" => (float)$SERVICE->getTotalAmount()
             ]
         ]);
     } else {

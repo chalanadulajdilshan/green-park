@@ -277,6 +277,9 @@ class VehicleService
         $status = $request['status'] ?? '';
 
         $where = "WHERE 1=1";
+        
+        // Exclude delivered services (stage 7) from tracking page
+        $where .= " AND vs.current_stage < 7 AND vs.status != 'delivered'";
 
         if (!empty($search)) {
             $where .= " AND (vs.code LIKE '%$search%' OR vs.tracking_code LIKE '%$search%' OR vs.customer_name LIKE '%$search%' OR vs.vehicle_no LIKE '%$search%')";
