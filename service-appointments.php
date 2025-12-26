@@ -473,32 +473,33 @@ $APPOINTMENT = new ServiceAppointment();
                 'completed': 'mark as completed'
             };
             
-            Swal.fire({
+            swal({
                 title: 'Are you sure?',
                 text: `Do you want to ${statusLabels[status]} this appointment?`,
-                icon: 'question',
+                type: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: status === 'cancelled' ? '#dc2626' : '#2563eb',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, ' + statusLabels[status]
-            }).then((result) => {
-                if (result.isConfirmed) {
+                confirmButtonText: 'Yes, ' + statusLabels[status],
+                closeOnConfirm: false
+            }, function(isConfirm) {
+                if (isConfirm) {
                     $.post('ajax/php/service-appointment.php', {
                         update_status: true,
                         id: id,
                         status: status
                     }, function(response) {
                         if (response.status === 'success') {
-                            Swal.fire({
-                                icon: 'success',
+                            swal({
                                 title: 'Updated!',
                                 text: 'Appointment status has been updated.',
+                                type: 'success',
                                 timer: 1500,
                                 showConfirmButton: false
                             });
                             loadAppointments();
                         } else {
-                            Swal.fire('Error', 'Failed to update status', 'error');
+                            swal('Error', 'Failed to update status', 'error');
                         }
                     }, 'json');
                 }

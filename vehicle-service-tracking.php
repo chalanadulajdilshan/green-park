@@ -711,6 +711,9 @@ $CUSTOMER = new CustomerMaster();
                             <a href="vehicle-service-tracking.php<?php echo isset($page_id) ? ('?page_id=' . (int)$page_id) : ''; ?>" class="btn btn-success" id="newService">
                                 <i class="uil uil-plus me-1"></i> New Service
                             </a>
+                            <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#appointmentsModal">
+                                <i class="uil uil-calendar-alt me-1"></i> Load from Appointment
+                            </a>
                             <a href="#" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#serviceListModal">
                                 <i class="uil uil-search me-1"></i> View All Services
                             </a>
@@ -1092,6 +1095,27 @@ $CUSTOMER = new CustomerMaster();
         </div>
     </div>
 
+    <!-- Appointments Modal -->
+    <div class="modal fade" id="appointmentsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark"><i class="uil uil-calendar-alt me-2"></i>Load from Confirmed Appointment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                    <div id="appointmentsList">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="rightbar-overlay"></div>
 
     <script src="assets/libs/jquery/jquery.min.js"></script>
@@ -1187,6 +1211,14 @@ $CUSTOMER = new CustomerMaster();
             // Keep expected completion combined value updated
             $('#expected_completion_date, #expected_completion_time').on('change keyup', updateExpectedCompletionField);
             updateExpectedCompletionField();
+
+            // Load confirmed appointments dropdown
+            loadConfirmedAppointments();
+            
+            // Load appointments when modal opens
+            $('#appointmentsModal').on('show.bs.modal', function() {
+                loadConfirmedAppointments();
+            });
         });
 
         function toggleSection(section) {
@@ -1678,6 +1710,139 @@ $CUSTOMER = new CustomerMaster();
                 ],
                 order: [[5, 'desc']]
             });
+        }
+
+        // Load confirmed appointments into modal
+        function loadConfirmedAppointments() {
+            $('#appointmentsList').html(`
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `);
+            
+            $.ajax({
+                url: 'ajax/php/service-appointment.php',
+                type: 'POST',
+                data: {
+                    fetch_datatable: true,
+                    status: 'confirmed',
+                    start: 0,
+                    length: 50,
+                    draw: 1,
+                    search: { value: '' }
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.data && response.data.length > 0) {
+                        let html = '';
+                        response.data.forEach(apt => {
+                            html += `
+                                <div class="appointment-card-item" onclick="selectAppointment(${apt.id})" style="cursor: pointer; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; transition: all 0.2s;">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <span class="badge bg-primary">${apt.booking_code}</span>
+                                            <span class="badge bg-success ms-1">Confirmed</span>
+                                        </div>
+                                        <small class="text-muted">${apt.preferred_date} at ${apt.preferred_time}</small>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>${apt.customer_name}</strong><br>
+                                            <small class="text-muted">${apt.customer_phone}</small>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <strong>${apt.vehicle_no}</strong><br>
+                                            <small class="text-muted">${apt.brand_name || ''} ${apt.model_name || ''}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        $('#appointmentsList').html(html);
+                        
+                        // Add hover effect
+                        $('.appointment-card-item').hover(
+                            function() { $(this).css({'border-color': '#f59e0b', 'background': '#fffbeb'}); },
+                            function() { $(this).css({'border-color': '#e5e7eb', 'background': 'transparent'}); }
+                        );
+                    } else {
+                        $('#appointmentsList').html(`
+                            <div class="text-center py-4 text-muted">
+                                <i class="uil uil-calendar-slash" style="font-size: 48px;"></i>
+                                <p class="mt-2">No confirmed appointments found.</p>
+                            </div>
+                        `);
+                    }
+                }
+            });
+        }
+        
+        // Select appointment from modal
+        function selectAppointment(appointmentId) {
+            $('#appointmentsModal').modal('hide');
+            loadAppointmentData(appointmentId);
+        }
+
+        // Load appointment data and populate form
+        function loadAppointmentData(appointmentId) {
+            $.get('ajax/php/service-appointment.php', { get_appointment: true, id: appointmentId }, function(response) {
+                if (response.status === 'success') {
+                    const data = response.data;
+                    
+                    // Populate customer info
+                    $('#customer_name').val(data.customer_name);
+                    $('#customer_phone').val(data.customer_phone);
+                    $('#customer_id').val(0);
+                    
+                    // Populate vehicle info
+                    $('#vehicle_no').val(data.vehicle_no);
+                    $('#vehicle_brand_id').val(data.vehicle_brand_id);
+                    
+                    // Load models and select the right one
+                    loadModelsByBrand(data.vehicle_brand_id, data.vehicle_model_id);
+                    
+                    // Store appointment ID for reference
+                    $('#service-form').data('appointment_id', data.id);
+                    
+                    // Populate remarks with notes
+                    if (data.notes) {
+                        $('#remarks').val('Appointment Notes: ' + data.notes);
+                    }
+                    
+                    // Unlock all sections for editing
+                    $('.vs-section').removeClass('locked').addClass('expanded');
+                    $('.vs-section-header').addClass('active');
+                    
+                    // Add selected services
+                    if (data.services && data.services.length > 0) {
+                        // Clear existing jobs first (for new service)
+                        if ($('#service_id').val() == 0) {
+                            selectedServiceJobs = [];
+                            data.services.forEach(service => {
+                                selectedServiceJobs.push({
+                                    service_type_id: service.id,
+                                    name: service.name,
+                                    price: service.price,
+                                    notes: ''
+                                });
+                            });
+                            renderSelectedJobs();
+                            updateTotalAmount();
+                        }
+                    }
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Appointment Loaded',
+                        text: 'Form populated with appointment data. You can now create the service.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            }, 'json');
         }
 
         function showError(message) {
