@@ -206,7 +206,15 @@ class Cashbook
         $resultIncome = mysqli_fetch_array($db->readQuery($queryDailyIncome));
         $totalDailyIncome = (float) $resultIncome['total'];
 
-        return $totalCashInvoices + $totalPaymentReceipts + $totalDailyIncome;
+        // Cash from service payments (vehicle services)
+        $whereService = str_replace('si.invoice_date', 'vsp.created_at', $where);
+        $queryServicePayments = "SELECT COALESCE(SUM(vsp.amount), 0) as total
+                                 FROM `vehicle_service_payments` vsp
+                                 $whereService AND vsp.payment_type_id = 1";
+        $resultServicePayments = mysqli_fetch_array($db->readQuery($queryServicePayments));
+        $totalServicePayments = (float) $resultServicePayments['total'];
+
+        return $totalCashInvoices + $totalPaymentReceipts + $totalDailyIncome + $totalServicePayments;
     }
 
     // Get total cash OUT from various sources
@@ -368,6 +376,32 @@ class Cashbook
                 'account_type' => 'CASH',
                 'transaction' => 'IN',
                 'description' => $row['description'],
+                'doc' => $row['doc'],
+                'debit' => number_format($row['amount'], 2),
+                'credit' => '0.00',
+                'balance' => number_format($runningBalance, 2),
+                'sort_date' => $row['date']
+            ];
+        }
+
+        // Service payments (cash)
+        $whereService = str_replace('invoice_date', 'vsp.created_at', $where);
+        $query = "SELECT DATE(vsp.created_at) as date,
+                         CONCAT('SVP-', vsp.id) as doc,
+                         vsp.amount,
+                         CONCAT('Service Payment - ', COALESCE(vs.code, '')) as description
+                  FROM vehicle_service_payments vsp
+                  LEFT JOIN vehicle_service vs ON vsp.service_id = vs.id
+                  $whereService AND vsp.payment_type_id = 1
+                  ORDER BY vsp.created_at ASC";
+        $result = $db->readQuery($query);
+        while ($row = mysqli_fetch_array($result)) {
+            $runningBalance += (float)$row['amount'];
+            $transactions[] = [
+                'date' => date('Y-m-d', strtotime($row['date'])),
+                'account_type' => 'CASH',
+                'transaction' => 'IN',
+                'description' => $row['description'] ?: 'Service Payment',
                 'doc' => $row['doc'],
                 'debit' => number_format($row['amount'], 2),
                 'credit' => '0.00',
