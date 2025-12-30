@@ -1,6 +1,82 @@
 <?php
 
 include '../../class/include.php';
+
+// Function to send SMS via OzoneDesk API
+function sendSMS($phone, $message) {
+    $user_id = "105974";
+    $api_key = "8evcpzsicpx7zvo4y";
+    $sender_id = "ozoneDEMO"; // Use approved sender ID in production
+    
+    // Format phone number (ensure it starts with 94 for Sri Lanka)
+    $phone = preg_replace('/[^0-9]/', '', $phone); // Remove non-numeric characters
+    if (substr($phone, 0, 1) === '0') {
+        $phone = '94' . substr($phone, 1); // Convert 07X to 947X
+    } elseif (substr($phone, 0, 2) !== '94') {
+        $phone = '94' . $phone;
+    }
+    
+    // Build query parameters
+    $params = http_build_query([
+        "user_id"   => $user_id,
+        "api_key"   => $api_key,
+        "sender_id" => $sender_id,
+        "to"        => $phone,
+        "message"   => $message,
+    ]);
+    
+    // API URL
+    $url = "http://send.ozonedesk.com/api/v2/send.php?" . $params;
+    
+    // Make HTTP request using cURL for better error handling
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    $response = curl_exec($ch);
+    $curl_error = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    // Check for cURL errors
+    if ($curl_error) {
+        error_log("OzoneDesk SMS cURL error: {$curl_error}");
+        return [
+            'success' => false,
+            'reason' => 'Connection error: ' . $curl_error
+        ];
+    }
+    
+    // Decode JSON response
+    $result = json_decode($response, true);
+    if ($result === null) {
+        error_log("OzoneDesk SMS invalid JSON. HTTP {$http_code}. Raw response: {$response}");
+    } else {
+        error_log("OzoneDesk SMS response: HTTP {$http_code} " . json_encode($result));
+    }
+    
+    if ($result && isset($result["status"]) && $result["status"] === "success") {
+        return [
+            'success' => true,
+            'reason' => 'SMS sent successfully'
+        ];
+    } else {
+        $error_msg = 'Unknown error';
+        if ($result && isset($result['result'])) {
+            $error_msg = $result['result'];
+        } elseif ($result && isset($result['error'])) {
+            $error_msg = $result['error'];
+        } elseif (!$result) {
+            $error_msg = 'Invalid API response';
+        }
+        return [
+            'success' => false,
+            'reason' => $error_msg
+        ];
+    }
+}
 header('Content-Type: application/json; charset=UTF8');
 
 // Create a new Vehicle Service
@@ -100,11 +176,23 @@ if (isset($_POST['update_stage'])) {
     $result = $SERVICE->updateStage($stage, $notes);
 
     if ($result) {
-        echo json_encode([
+        $response = [
             "status" => 'success',
             "stage" => $stage,
             "stage_name" => VehicleService::STAGES[$stage]['name'] ?? 'Unknown'
-        ]);
+        ];
+        
+        // Send SMS notification only when stage is "Ready for Pickup" (stage 6)
+        if ($stage == 6 && !empty($SERVICE->customer_phone)) {
+            $sms_message = "Dear " . $SERVICE->customer_name . ", your vehicle (" . $SERVICE->vehicle_no . ") is now Ready for Pickup. Tracking: " . $SERVICE->tracking_code . ". Thank you!";
+            
+            $sms_result = sendSMS($SERVICE->customer_phone, $sms_message);
+            
+            $response['sms_sent'] = $sms_result['success'];
+            $response['sms_message'] = $sms_result['reason'];
+        }
+        
+        echo json_encode($response);
     } else {
         echo json_encode(["status" => 'error']);
     }

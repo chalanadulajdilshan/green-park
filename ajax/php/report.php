@@ -65,11 +65,25 @@ if (isset($_POST['action']) && $_POST['action'] === 'load_profit_report') {
         $totalDailyIncome = $dailyIncome->getTotalIncome($filters['from_date'], $filters['to_date']);
     }
 
+    // Calculate total service payments (vehicle services) for the same date range
+    $totalServicePayments = 0;
+    if (!empty($filters['from_date']) && !empty($filters['to_date'])) {
+        $db = Database::getInstance();
+        $from = mysqli_real_escape_string($db->DB_CON, $filters['from_date']);
+        $to = mysqli_real_escape_string($db->DB_CON, $filters['to_date']);
+        $queryServicePayments = "SELECT COALESCE(SUM(amount), 0) as total
+                                 FROM `vehicle_service_payments`
+                                 WHERE DATE(created_at) BETWEEN '$from' AND '$to'";
+        $resultService = mysqli_fetch_assoc($db->readQuery($queryServicePayments));
+        $totalServicePayments = (float) ($resultService['total'] ?? 0);
+    }
+
     // Prepare response with sales data, expense total, and daily income total
     $response = [
         'sales_data' => $items,
         'total_expenses' => $totalExpenses,
         'total_daily_income' => $totalDailyIncome,
+        'total_service_payments' => $totalServicePayments,
         'total_returns' => $totalReturns
     ];
 

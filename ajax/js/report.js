@@ -495,6 +495,7 @@ jQuery(document).ready(function () {
                 const data = response.sales_data || response; // Fallback for backward compatibility
                 const totalExpenses = parseFloat(response.total_expenses) || 0;
                 const totalDailyIncome = parseFloat(response.total_daily_income) || 0;
+                const totalServicePayments = parseFloat(response.total_service_payments) || 0;
                 const totalReturns = parseFloat(response.total_returns) || 0;
 
                 if (data.length > 0) {
@@ -534,7 +535,7 @@ jQuery(document).ready(function () {
                     });
 
                     // Calculate final profit after expenses (Total Sales Profit - Total Expenses)
-                    const finalProfit = totalProfit - totalExpenses - totalReturns + totalDailyIncome;
+                    const finalProfit = totalProfit - totalExpenses - totalReturns + totalDailyIncome + totalServicePayments;
 
                     // Add summary rows
                     tbody += `<tr style="font-weight:bold; background-color:#f8f9fa; border-top: 2px solid #dee2e6;">
@@ -575,8 +576,19 @@ jQuery(document).ready(function () {
                         </td>
                     </tr>`;
 
+                    // Add service payments row showing in both Profit and Selling columns
+                    tbody += `<tr style="font-weight:bold; background-color:#e8f4ff; border: 1px solid #b8daff;">
+                        <td colspan="9" class="text-end">Total Service Payments</td>
+                        <td style="color: #0c5460;">
+                            ${totalServicePayments.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td style="color: #0c5460;">
+                            ${totalServicePayments.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                    </tr>`;
+
                     // Add Total Sales Profit after Expenses row - under Selling column
-                    const salesProfitAfterExpenses = totalGrandTotal - totalExpenses + totalDailyIncome;
+                    const salesProfitAfterExpenses = totalGrandTotal - totalExpenses + totalDailyIncome + totalServicePayments;
                     tbody += `<tr style="font-weight:bold; background-color:#e9ecef; border: 1px solid #adb5bd;">
                         <td colspan="9" class="text-end">Total Sales Profit after Expenses</td>
                         <td style="color: ${salesProfitAfterExpenses >= 0 ? '#28a745' : '#dc3545'}; font-size: 1.1em;">
