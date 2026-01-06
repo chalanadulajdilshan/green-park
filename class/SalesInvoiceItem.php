@@ -197,9 +197,15 @@ class SalesInvoiceItem
     
         while ($row = mysqli_fetch_assoc($result)) {
             // safely load item master
-            if ($row['item_code'] !=0) {
+            if ($row['item_code'] != 0) {
                 $item_master = new ItemMaster($row['item_code']);
-                $row['item_code_name'] = $item_master->code ?? '';
+                if (!empty($item_master->code)) {
+                    $row['item_code_name'] = $item_master->code;
+                } else {
+                    // Check if it's a pure service (SV/) - item_code stores service ID
+                    // Format as SV/0000 to match the display format used when adding items
+                    $row['item_code_name'] = 'SV/' . str_pad($row['item_code'], 4, '0', STR_PAD_LEFT);
+                }
             } else {
                  $service_item_master = new ServiceItem($row['service_item_code']);
                  $row['item_code_name'] = $service_item_master->item_code ?? '';

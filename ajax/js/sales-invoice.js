@@ -234,10 +234,10 @@ jQuery(document).ready(function () {
                         <td colspan="1" style="width: 15%;"><strong>ARN:</strong> ${arnId}
                         
                         <div style="font-size: 12px; color: red">Cost: ${Number(
-                          row.final_cost
-                        ).toLocaleString("en-US", {
-                          minimumFractionDigits: 2,
-                        })}</div>
+            row.final_cost
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+          })}</div>
                         </td>
                       
                         
@@ -254,19 +254,19 @@ jQuery(document).ready(function () {
                         <td style="width: 15%;">
                             <div><strong>List Price:</strong></div>
                             <div class='text-danger'><b>${Number(
-                              item.list_price
-                            ).toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                            })}</b></div>
+            item.list_price
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+          })}</b></div>
                         </td>
                     
                         <td style="width: 15%;">
                             <div><strong>Sales Price:</strong></div>
                             <div class='text-danger'><b>${Number(
-                              item.invoice_price
-                            ).toLocaleString("en-US", {
-                              minimumFractionDigits: 2,
-                            })}</b></div>
+            item.invoice_price
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+          })}</b></div>
                         </td>
                     
                         <td colspan="2">${row.created_at}</td>
@@ -380,10 +380,12 @@ jQuery(document).ready(function () {
             if (!isServiceAlreadySelected) {
               $("#itemPrice").val(data.service_selling_price);
               $("#itemSalePrice").val(data.service_selling_price);
+              // Clear service selling price to avoid double counting when invoicing service item alone
+              $("#serviceSellingPrice").val("0");
+            } else {
+              // Combine list price + service selling price for final selling price only when service is selected
+              combineServicePrices();
             }
-
-            // Combine list price + service selling price for final selling price
-            combineServicePrices();
           } else {
             console.error("Service not found. ID searched:", selectedId);
           }
@@ -450,10 +452,15 @@ jQuery(document).ready(function () {
     $("#serviceQty").focus();
   });
 
-  // Function to combine list price + service selling price (only for service items)
+  // Function to combine list price + service selling price (only when BOTH service and service item are selected)
   function combineServicePrices() {
-    // Only combine prices when service item table is visible (service invoicing mode)
-    if ($("#serviceItemTable").is(":visible")) {
+    // Only combine prices when:
+    // 1. Service item table is visible (service invoicing mode)
+    // 2. A main service (SV/) is selected in the item code
+    const currentItemCode = $("#itemCode").val().trim();
+    const hasMainService = currentItemCode.startsWith("SV/");
+
+    if ($("#serviceItemTable").is(":visible") && hasMainService) {
       const listPrice = parseFloat($("#itemPrice").val()) || 0;
       const serviceSellingPrice =
         parseFloat($("#serviceSellingPrice").val()) || 0;
@@ -537,8 +544,18 @@ jQuery(document).ready(function () {
       $("#item_cost_arn").val(totalCost.toFixed(2));
       $("#serviceSellingPrice").val(totalSellingPrice.toFixed(2));
 
-      // Trigger the price combination with discount calculation
-      combineServicePrices();
+      // Check if a main service (SV/) is selected
+      const currentItemCode = $("#itemCode").val().trim();
+      const hasMainService = currentItemCode.startsWith("SV/");
+
+      if (hasMainService) {
+        // If main service is selected, combine list price + service selling price
+        combineServicePrices();
+      } else {
+        // If only service item (SI/) is selected, update the main selling price directly
+        $("#itemSalePrice").val(totalSellingPrice.toFixed(2));
+        calculatePayment();
+      }
     }
   }
 
@@ -574,9 +591,8 @@ jQuery(document).ready(function () {
     }
 
     pagination += `<li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-                     <a class="page-link" href="#" data-page="${
-                       currentPage - 1
-                     }">Prev</a>
+                     <a class="page-link" href="#" data-page="${currentPage - 1
+      }">Prev</a>
                    </li>`;
 
     for (let i = 1; i <= totalPages; i++) {
@@ -585,12 +601,10 @@ jQuery(document).ready(function () {
                        </li>`;
     }
 
-    pagination += `<li class="page-item ${
-      currentPage === totalPages ? "disabled" : ""
-    }">
-                     <a class="page-link" href="#" data-page="${
-                       currentPage + 1
-                     }">Next</a>
+    pagination += `<li class="page-item ${currentPage === totalPages ? "disabled" : ""
+      }">
+                     <a class="page-link" href="#" data-page="${currentPage + 1
+      }">Next</a>
                    </li>`;
 
     $("#itemPagination").html(pagination);
@@ -1766,10 +1780,11 @@ jQuery(document).ready(function () {
     const currentKm = $("#currentKm").val().trim() || "";
     const nextServiceDays = $("#nextServiceDays").val().trim() || "";
 
-    // For service items, use serviceSellingPrice as the price if main itemPrice is empty
+    // For service items, use unitServiceSellingPrice as the unit price if main itemPrice is empty
+    // Note: serviceSellingPrice is already multiplied by qty, so we use unitServiceSellingPrice for unit price
     let effectivePrice = price;
     if (isServiceItemCode && price <= 0) {
-      effectivePrice = parseFloat($("#serviceSellingPrice").val()) || 0;
+      effectivePrice = unitServiceSellingPrice || 0;
     }
 
     // Validation: skip price/qty check for service items if they have valid serviceQty and serviceSellingPrice
@@ -1939,12 +1954,12 @@ jQuery(document).ready(function () {
                 <td class="item-qty">${qty}</td>
                 <td class="item-discount">${discount}</td>
                 <td class="item-sell-price">${(price - discount).toFixed(
-                  2
-                )}</td>
+        2
+      )}</td>
                 <td>${serviceTotal.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}</td>
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}</td>
                 <td>
                     <button type="button" class="btn btn-sm btn-danger btn-remove-item" data-code="${code}" data-qty="${qty}" data-arn-id="${arnId}">Remove</button>
                 </td>
@@ -1956,7 +1971,10 @@ jQuery(document).ready(function () {
       const serviceItemCode =
         "SI/" + selectedServiceItemId.toString().padStart(4, "0");
       const serviceItemName = $("#service_items option:selected").text().trim();
-      const serviceItemTotal = serviceSellingPrice * serviceQty;
+      // serviceSellingPrice is already the total (unit * qty), use it directly for Total
+      // Use unitServiceSellingPrice for displaying unit prices
+      const serviceItemUnitPrice = unitServiceSellingPrice;
+      const serviceItemTotal = serviceSellingPrice; // Already calculated as unit * qty
       const serviceItemRow = `
             <tr>
                 <td>${serviceItemCode}
@@ -1970,16 +1988,16 @@ jQuery(document).ready(function () {
                     <input type="hidden" name="next_service_days[]" value="">
                 </td>
                 <td>${serviceItemName}</td>
-                <td class="item-price">${serviceSellingPrice.toFixed(2)}</td>
+                <td class="item-price">${serviceItemUnitPrice.toFixed(2)}</td>
                 <td class="item-qty">${serviceQty}</td>
                 <td class="item-discount">0</td>
-                <td class="item-sell-price">${serviceSellingPrice.toFixed(
-                  2
-                )}</td>
+                <td class="item-sell-price">${serviceItemUnitPrice.toFixed(
+        2
+      )}</td>
                 <td>${serviceItemTotal.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}</td>
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}</td>
                 <td>
                     <button type="button" class="btn btn-sm btn-danger btn-remove-item" data-code="${serviceItemCode}" data-qty="${serviceQty}" data-arn-id="${serviceItemCode}">Remove</button>
                 </td>
@@ -2021,12 +2039,12 @@ jQuery(document).ready(function () {
                 <td class="item-qty">${qty}</td>
                 <td class="item-discount">${discount}</td>
                 <td class="item-sell-price">${(displayPrice - discount).toFixed(
-                  2
-                )}</td>
+        2
+      )}</td>
                 <td>${total.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}</td>
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}</td>
                 <td>
                     <button type="button" class="btn btn-sm btn-danger btn-remove-item" data-code="${code}" data-qty="${qty}" data-arn-id="${arnId}">Remove</button>
                 </td>
@@ -2149,9 +2167,9 @@ jQuery(document).ready(function () {
     $("#tax").val(
       taxTotal > 0
         ? taxTotal.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
         : "0.00"
     );
     $("#finalTotal").val(
@@ -2395,19 +2413,17 @@ jQuery(document).ready(function () {
 
               const row = `
                             <tr>
-                                <td>${
-                                  item.item_code
-                                }                                
-                                <input type="hidden" class="item-id" value="${
-                                  item.item_id
-                                }"></td>
+                                <td>${item.item_code
+                }                                
+                                <input type="hidden" class="item-id" value="${item.item_id
+                }"></td>
                                 <td>${item.item_name}</td>
                                 <td><input type="number" class="item-price form-control form-control-sm price"   value="${price}"  ></td>
                                 <td><input type="number" class="item-qty form-control form-control-sm qty" value="${qty}"></td>
                                 <td><input type="number" class="item-discount form-control form-control-sm discount" value="${discount}"></td>
                                 <td><input type="text" class="item-total form-control form-control-sm totalPrice"  value="${total.toFixed(
-                                  2
-                                )}" readonly>
+                  2
+                )}" readonly>
                                 <td><button type="button" class="btn btn-sm btn-danger btn-remove-item" onclick="removeRow(this)">Remove</button></td>
                             </tr>
                             `;
@@ -2511,16 +2527,14 @@ jQuery(document).ready(function () {
                 <td>${item.serial_number || ""}</td>
                 <td>
                   <input type="number" class="form-control form-control-sm dag-cost" 
-                         value="${
-                           item.total_amount || "0.00"
-                         }" step="0.01" min="0" 
+                         value="${item.total_amount || "0.00"
+              }" step="0.01" min="0" 
                          data-dag-item-id="${item.id}">
                 </td>
                 <td>
                   <input type="number" class="form-control form-control-sm dag-price" 
-                         value="${
-                           item.casing_cost || "0.00"
-                         }" step="0.01" min="0" 
+                         value="${item.casing_cost || "0.00"
+              }" step="0.01" min="0" 
                          data-dag-item-id="${item.id}">
                 </td>
                 <td>
@@ -2704,9 +2718,9 @@ jQuery(document).ready(function () {
                   <td class="item-discount">${discount.toFixed(2)}</td>
                   <td class="item-sell-price">${sellingPrice.toFixed(2)}</td>
                   <td>${total.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}</td>
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}</td>
                   <td>
                     <button type="button" class="btn btn-sm btn-danger btn-remove-item" data-code="${code}" data-qty="${qty}" data-arn-id="${code}">Remove</button>
                   </td>
