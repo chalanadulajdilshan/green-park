@@ -102,7 +102,8 @@ if (isset($_POST['create'])) {
                 continue;
             }
 
-            if (substr($item['code'], 0, 2) === 'SI') {
+            // Skip stock check for service items (SI) and pure services (SV) - they have unlimited stock
+            if (substr($item['code'], 0, 2) === 'SI' || substr($item['code'], 0, 2) === 'SV') {
                 continue;
             }
 

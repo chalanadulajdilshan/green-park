@@ -472,15 +472,13 @@ jQuery(document).ready(function () {
       invoices.forEach((inv) => {
         const isCancelled = inv.is_cancel == 1;
         rows += `
-                <tr data-id="${inv.id}" ${
-          isCancelled ? 'style="background-color: #fff5f5;"' : ""
-        }>
+                <tr data-id="${inv.id}" ${isCancelled ? 'style="background-color: #fff5f5;"' : ""
+          }>
                     <td>${inv.id}</td>
-                    <td>${inv.invoice_no} ${
-          isCancelled
+                    <td>${inv.invoice_no} ${isCancelled
             ? '<span class="badge bg-danger ms-2">Cancelled</span>'
             : ""
-        }</td>
+          }</td>
                     <td>${inv.invoice_date}</td>
                     <td>${inv.department_name}</td>
                     <td>${inv.customer_name}</td>
@@ -552,35 +550,33 @@ jQuery(document).ready(function () {
             let row = `
                             <tr>
                                 <td>${item.item_code_name}</td>
-                                <td>${item.item_name}</td>
+                                <td>${item.display_name}</td>
                                 <td>${parseFloat(
-                                  item.list_price || item.price
-                                ).toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}</td>
+              item.list_price || item.price
+            ).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}</td>
                                 <td>${item.quantity}</td>
                                 <td>${discountValue}</td>
                                 <td>${parseFloat(item.price).toLocaleString(
-                                  undefined,
-                                  {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  }
-                                )}</td>   
+              undefined,
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }
+            )}</td>   
                                 <td>${parseFloat(item.total).toLocaleString(
-                                  undefined,
-                                  {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  }
-                                )}</td>
+              undefined,
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }
+            )}</td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-danger btn-remove-item" data-code="${
-                                      item.item_code
-                                    }" data-qty="${
-              item.quantity
-            }" data-arn-id="${item.id}">Remove</button>
+                                    <button type="button" class="btn btn-sm btn-danger btn-remove-item" data-code="${item.item_code
+              }" data-qty="${item.quantity
+              }" data-arn-id="${item.id}">Remove</button>
                                 </td>
                             </tr>
                         `;
@@ -621,8 +617,8 @@ jQuery(document).ready(function () {
         $('input[name="payment_type"]').prop("checked", false);
         $(
           'input[name="payment_type"][value="' +
-            (response.payment_type || "1") +
-            '"]'
+          (response.payment_type || "1") +
+          '"]'
         ).prop("checked", true);
 
         if (response.is_cancel == 1) {
