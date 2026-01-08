@@ -21,7 +21,6 @@ class SalesInvoice
     public $payment_type;
     public $sub_total;
     public $discount;
-    public  $is_vat;
     public $tax;
     public $grand_total;
     public $outstanding_settle_amount;
@@ -59,7 +58,6 @@ class SalesInvoice
                 $this->payment_type = $result['payment_type'];
                 $this->sub_total = $result['sub_total'];
                 $this->discount = $result['discount'];
-                $this->is_vat = $result['is_vat'];
                 $this->tax = $result['tax'];
                 $this->grand_total = $result['grand_total'];
                 $this->outstanding_settle_amount = $result['outstanding_settle_amount'];
@@ -77,11 +75,11 @@ class SalesInvoice
     {
         $query = "INSERT INTO `sales_invoice` (
             `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_address`, `recommended_person`, `department_id`, 
-            `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, `is_vat`,
+            `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, 
             `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`
         ) VALUES (
             '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_address}', '{$this->recommended_person}', '{$this->department_id}', 
-            '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', '{$this->is_vat}',
+            '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', 
             '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}'
         )";
 
@@ -116,7 +114,6 @@ class SalesInvoice
             `payment_type` = '{$this->payment_type}', 
             `sub_total` = '{$this->sub_total}', 
             `discount` = '{$this->discount}', 
-            `is_vat` = '{$this->is_vat}', 
             `tax` = '{$this->tax}', 
             `grand_total` = '{$this->grand_total}', 
             `remark` = '{$this->remark}' 
@@ -145,7 +142,7 @@ class SalesInvoice
         $db = Database::getInstance();
         $result = $db->readQuery($query); // Assuming your Database class supports parameters
 
-        if ($result) {
+         if ($result) {
             return ['success' => true, 'message' => 'Invoice cancelled successfully'];
         } else {
             return ['success' => false, 'reason' => 'database_error', 'message' => 'Database error occurred while cancelling invoice'];
@@ -159,12 +156,12 @@ class SalesInvoice
         $query = "SELECT COUNT(*) as return_count FROM `sales_return` WHERE `invoice_id` = {$this->id}";
         $db = Database::getInstance();
         $result = mysqli_fetch_array($db->readQuery($query));
-
+        
         $is_return = ($result['return_count'] > 0) ? 1 : 0;
-
+        
         $update_query = "UPDATE `sales_invoice` SET `is_return` = {$is_return} WHERE `id` = {$this->id}";
         $db->readQuery($update_query);
-
+        
         $this->is_return = $is_return;
         return true;
     }
@@ -173,11 +170,11 @@ class SalesInvoice
     public function isInvoicePartiallyPaid($invoiceId = null)
     {
         $id = $invoiceId ?: $this->id;
-
+        
         $query = "SELECT COUNT(*) as payment_count FROM `payment_receipt_method` WHERE `invoice_id` = {$id}";
         $db = Database::getInstance();
         $result = mysqli_fetch_array($db->readQuery($query));
-
+        
         return ($result['payment_count'] > 0);
     }
 
@@ -540,6 +537,7 @@ class SalesInvoice
                     si.invoice_date as date,
                     si.customer_name as customer,
                     dm.name as department,
+                    si.tax as vat_amount,
                     si.grand_total as amount,
                     CASE 
                         WHEN si.sale_type = 1 THEN 'Cash Sale'
@@ -590,7 +588,8 @@ class SalesInvoice
             3 => 'customer',
             4 => 'dm.name',
             5 => 'sales_type',
-            6 => 'si.grand_total'
+            6 => 'si.tax',
+            7 => 'si.grand_total'
         ];
 
         if (isset($columnMap[$orderColumn])) {
@@ -609,16 +608,20 @@ class SalesInvoice
         $result = $db->readQuery($query);
         $data = [];
         $totalAmount = 0;
+        $totalVat = 0;
 
         while ($row = mysqli_fetch_assoc($result)) {
             $amount = (float)$row['amount'];
+            $vatAmount = (float)$row['vat_amount'];
             $totalAmount += $amount;
+            $totalVat += $vatAmount;
             $data[] = [
                 'id' => $row['id'],
                 'invoice_id' => $row['invoice_id'],
                 'date' => date('Y-m-d', strtotime($row['date'])),
                 'customer_name' => $row['customer'],
                 'department' => $row['department'],
+                'vat_amount' => $vatAmount,
                 'amount' => $amount, // Keep as number for DataTables
                 'formatted_amount' => number_format($amount, 2), // Add formatted version for display
                 'sales_type' => $row['sales_type'],
@@ -629,7 +632,8 @@ class SalesInvoice
         return [
             'data' => $data,
             'total_records' => $totalRecords,
-            'total_amount' => number_format($totalAmount, 2)
+            'total_amount' => round($totalAmount, 2),
+            'total_vat' => round($totalVat, 2)
         ];
     }
 

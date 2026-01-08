@@ -141,6 +141,7 @@ include './auth.php';
                                                     <th>Customer</th>
                                                     <th>Department</th>
                                                     <th>Sales Type</th>
+                                                    <th class="text-end">VAT Amount</th>
                                                     <th class="text-end">Amount</th>
                                                 </tr>
                                             </thead>
@@ -149,8 +150,13 @@ include './auth.php';
                                             </tbody>
                                             <tfoot>
                                                 <tr>
-                                                    <th colspan="5"></th>
-                                                    <th class="text-end">Total:</th>
+                                                    <th colspan="6"></th>
+                                                    <th class="text-end">VAT Total:</th>
+                                                    <th class="text-end" id="totalVat">0.00</th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="6"></th>
+                                                    <th class="text-end">Amount Total:</th>
                                                     <th class="text-end" id="totalAmount">0.00</th>
                                                 </tr>
                                             </tfoot>
@@ -236,12 +242,14 @@ include './auth.php';
                 ajax: function(data, callback, settings) {
                     // If not allowed to fetch yet, return empty set
                     if (!allowFetch) {
+                        $('#totalVat').text('0.00');
                         $('#totalAmount').text('0.00');
                         return callback({
                             data: [],
                             recordsTotal: 0,
                             recordsFiltered: 0,
-                            total_amount: 0
+                            total_amount: 0,
+                            total_vat: 0
                         });
                     }
 
@@ -261,20 +269,20 @@ include './auth.php';
                         data: $.extend({}, data, payload),
                         success: function(json) {
                             // Update total amount
-                            if (json && json.total_amount !== undefined) {
-                                $('#totalAmount').text(parseFloat(json.total_amount).toFixed(2));
-                            } else {
-                                $('#totalAmount').text('0.00');
-                            }
+                            const hasTotals = json && json.total_amount !== undefined;
+                            $('#totalAmount').text(hasTotals ? parseFloat(json.total_amount).toFixed(2) : '0.00');
+                            $('#totalVat').text(json && json.total_vat !== undefined ? parseFloat(json.total_vat).toFixed(2) : '0.00');
                             callback(json);
                         },
                         error: function() {
+                            $('#totalVat').text('0.00');
                             $('#totalAmount').text('0.00');
                             callback({
                                 data: [],
                                 recordsTotal: 0,
                                 recordsFiltered: 0,
-                                total_amount: 0
+                                total_amount: 0,
+                                total_vat: 0
                             });
                         }
                     });
@@ -299,6 +307,16 @@ include './auth.php';
                     },
                     {
                         data: 'sales_type'
+                    },
+                    {
+                        data: 'vat_amount',
+                        className: 'text-end',
+                        render: function(data, type) {
+                            if (type === 'display' || type === 'filter') {
+                                return parseFloat(data || 0).toFixed(2);
+                            }
+                            return data;
+                        }
                     },
                     {
                         data: 'amount',
@@ -328,14 +346,17 @@ include './auth.php';
                 footerCallback: function(row, data, start, end, display) {
                     var api = this.api();
                     var total = 0;
+                    var vatTotal = 0;
 
                     // Calculate total from the data
                     data.forEach(function(row) {
                         total += parseFloat(row.amount) || 0;
+                        vatTotal += parseFloat(row.vat_amount) || 0;
                     });
 
                     // Update footer
                     $('#totalAmount').text(total.toFixed(2));
+                    $('#totalVat').text(vatTotal.toFixed(2));
                 },
                 drawCallback: function() {
                     // Add row numbers
@@ -407,6 +428,7 @@ include './auth.php';
                 } else {
                     allowFetch = false;
                     salesTable.clear().draw();
+                    $('#totalVat').text('0.00');
                     $('#totalAmount').text('0.00');
                 }
             });
@@ -426,6 +448,7 @@ include './auth.php';
                 // Clear the table and totals
                 allowFetch = false;
                 salesTable.clear().draw();
+                $('#totalVat').text('0.00');
                 $('#totalAmount').text('0.00');
             });
         });
