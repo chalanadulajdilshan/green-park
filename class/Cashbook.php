@@ -521,7 +521,7 @@ class Cashbook
                         CONCAT('ARN Purchase - ', COALESCE(cm.name, '')) as description
                   FROM arn_master am
                   LEFT JOIN customer_master cm ON am.supplier_id = cm.id
-                  $whereArnDetail AND (am.is_cancelled IS NULL OR am.is_cancelled = 0) AND am.supplier_id != 0
+                  $whereArnDetail AND (am.is_cancelled IS NULL OR am.is_cancelled = 0) AND am.supplier_id != 0 AND am.purchase_type = 1 
                   ORDER BY am.entry_date ASC";
         $result = $db->readQuery($query);
         while ($row = mysqli_fetch_array($result)) {
