@@ -286,7 +286,7 @@ class ArnMaster
                  AND purchase_type = $status
                  AND `total_arn_value` > `paid_amount`      
                  AND `is_cancelled`='0'
-                 ORDER BY `invoice_date` DESC";
+                 ORDER BY `invoice_date` ASC";
         $db = Database::getInstance();
         $result = $db->readQuery($query);
         $array_res = array();

@@ -461,7 +461,7 @@ class SalesInvoice
                  AND `customer_id` = $customer_id 
                  AND `grand_total` > `outstanding_settle_amount`      
                  AND `is_cancel`='0'
-                 ORDER BY `invoice_date` DESC";
+                 ORDER BY `invoice_date` ASC";
         $db = Database::getInstance();
         $result = $db->readQuery($query);
         $array_res = array();
