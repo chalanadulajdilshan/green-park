@@ -2127,7 +2127,7 @@ jQuery(document).ready(function () {
         parseFloat($(this).find(".item-discount").text().replace(/,/g, "")) ||
         0;
       const itemTotal = price * qty;
-      const itemDiscount = discount; // Discount is now treated as a fixed amount
+      const itemDiscount = discount * qty; // Multiply per-unit discount by quantity
       let itemTax = 0;
 
       console.log("Item - Qty:", qty, "Price:", price, "Discount:", discount);
@@ -2237,12 +2237,10 @@ jQuery(document).ready(function () {
       }
       $("#itemSalePrice").val(finalSalePrice.toFixed(2));
     } else if (changedField === "salePrice") {
-      // Recalculate Discount as fixed value per unit
+      // Recalculate Discount as fixed value per unit (can be negative for markup)
       if (price > 0) {
         finalDiscount = price - salePrice;
-        if (finalDiscount < 0) {
-          finalDiscount = 0;
-        }
+        // Allow negative discount (markup/premium) when sale price > list price
         $("#itemDiscount").val(finalDiscount.toFixed(2));
       }
     }

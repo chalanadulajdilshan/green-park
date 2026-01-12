@@ -17,7 +17,7 @@ class Database
 
             // Local DB
             $this->host = 'localhost';
-            $this->name = 'geen-park';
+            $this->name = '360-erp';
             $this->user = 'root';
             $this->password = '';
 
