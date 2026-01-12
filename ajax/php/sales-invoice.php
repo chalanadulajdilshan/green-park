@@ -199,16 +199,16 @@ if (isset($_POST['create'])) {
 
 
 
-    // VAT calculation - only if company has VAT enabled
+    
+    // VAT calculation - apply only when explicitly selected
     $tax = 0;
-    if (isset($_POST['is_vat_invoice']) && $_POST['is_vat_invoice'] == '1') {
-        $vat_percentage =  $COMPANY_PROFILE->vat_percentage;
+    $isVatInvoice = isset($_POST['is_vat_invoice']) && $_POST['is_vat_invoice'] == '1';
+
+    if ($isVatInvoice) {
+        $vat_percentage = $COMPANY_PROFILE->vat_percentage;
         if ($vat_percentage > 0) {
             $tax = round(($netTotal * $vat_percentage) / 100, 2);
         }
-    } elseif ($COMPANY_PROFILE->is_vat == 1) {
-        // Fallback to company profile if form data not provided
-        $tax = round(($netTotal * $COMPANY_PROFILE->vat_percentage) / 100, 2);
     }
 
 
