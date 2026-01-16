@@ -229,11 +229,16 @@ class SalesInvoiceItem
     // Helper method to extract clean item name without ARN metadata
     private function extractCleanItemName($itemName)
     {
+        // Remove ARN metadata first
         if (strpos($itemName, '|ARN:') !== false) {
             $parts = explode('|ARN:', $itemName);
-            return trim($parts[0]);
+            $itemName = trim($parts[0]);
         }
-        return $itemName;
+
+        // Remove trailing location suffix like " L1" or "L1"
+        $itemName = preg_replace('/\s*[A-Z]+\d+$/', '', $itemName);
+
+        return trim($itemName);
     }
     
 
