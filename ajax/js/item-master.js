@@ -620,5 +620,29 @@ jQuery(document).ready(function () {
         return false;
     });
 
+    $('#location_id').on('change', function() {
+        var locationText = $(this).find('option:selected').text();
+        var itemNameField = $('#name');
+        var currentName = itemNameField.val().trim();
+
+        var locationPattern = /\s*[A-Z]\d+$/; // match suffix like " L1" or "L1"
+
+        if (locationText && locationText !== '-- Select Location --') {
+            var baseItemName = currentName;
+
+            if (locationPattern.test(currentName)) {
+                baseItemName = currentName.replace(locationPattern, '');
+            }
+
+            var newItemName = baseItemName.trim() + ' ' + locationText;
+            itemNameField.val(newItemName.trim());
+        } else {
+            if (locationPattern.test(currentName)) {
+                var baseItemName = currentName.replace(locationPattern, '');
+                itemNameField.val(baseItemName.trim());
+            }
+        }
+    });
+
 
 });
