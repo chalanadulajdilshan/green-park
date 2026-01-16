@@ -1923,6 +1923,18 @@ jQuery(document).ready(function () {
     const serviceSellingPrice =
       parseFloat($("#serviceSellingPrice").val()) || 0;
 
+    // Validate selling price is not lower than cost for regular items
+    if (!isServiceItemCode && !isPureServiceCode && cost > 0 && sale_price < cost) {
+      swal({
+        title: "Error!",
+        text: `Selling price (${sale_price.toFixed(2)}) cannot be lower than the cost (${cost.toFixed(2)}) for regular items.`,
+        type: "error",
+        timer: 3000,
+        showConfirmButton: true,
+      });
+      return;
+    }
+
     // Check if we have both a service and a service item selected
     const selectedServiceId = $("#service").val();
     const selectedServiceItemId = $("#service_items").val();
