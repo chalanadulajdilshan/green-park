@@ -1815,29 +1815,28 @@ $CUSTOMER = new CustomerMaster();
                     $('.vs-section').removeClass('locked').addClass('expanded');
                     $('.vs-section-header').addClass('active');
                     
-                    // Add selected services
+                    // Add selected services from appointment
                     if (data.services && data.services.length > 0) {
-                        // Clear existing jobs first (for new service)
+                        // Clear existing selected services (for new service)
                         if ($('#service_id').val() == 0) {
-                            selectedServiceJobs = [];
+                            selectedServices = [];
                             data.services.forEach(service => {
-                                selectedServiceJobs.push({
+                                selectedServices.push({
                                     service_type_id: service.id,
                                     name: service.name,
                                     price: service.price,
                                     notes: ''
                                 });
                             });
-                            renderSelectedJobs();
-                            updateTotalAmount();
+                            renderServices();
                         }
                     }
                     
                     // Show success message
-                    Swal.fire({
-                        icon: 'success',
+                    swal({
                         title: 'Appointment Loaded',
                         text: 'Form populated with appointment data. You can now create the service.',
+                        type: 'success',
                         timer: 2000,
                         showConfirmButton: false
                     });
