@@ -212,8 +212,9 @@ jQuery(document).ready(function () {
         // Checkbox
         $('#is_active').prop('checked', data.status == 1); // assuming 1 = active
 
-        // Optional: trigger change for dropdowns if you have dependent selects
-        $('#brand, #group, #category, #stock_type').trigger('change');
+        // Set location_id and trigger change for dropdowns
+        $('#location_id').val(data.location_id);
+        $('#brand, #group, #category, #stock_type, #location_id').trigger('change');
         $('#create').hide();
         $('#update').removeAttr('hidden');
 
