@@ -217,7 +217,7 @@ class ItemMaster
             // Calculate total available quantity from ARN records (stock_item_tmp)
             $totalQty = 0;
             foreach ($row['stock_tmp'] as $tmpRow) {
-                $totalQty += (float)$tmpRow['qty'];
+                $totalQty += (float) $tmpRow['qty'];
             }
             $row['total_available_qty'] = $totalQty;
 
@@ -275,7 +275,7 @@ class ItemMaster
 
         $status = $request['status'] ?? null;
         $stockOnly = isset($request['stock_only']) ? filter_var($request['stock_only'], FILTER_VALIDATE_BOOLEAN) : false;
-        $departmentId = isset($request['department_id']) ? (int)$request['department_id'] : 0;
+        $departmentId = isset($request['department_id']) ? (int) $request['department_id'] : 0;
         $expandDepartments = isset($request['expand_departments']) ? filter_var($request['expand_departments'], FILTER_VALIDATE_BOOLEAN) : false;
 
         $where = "WHERE 1=1";
@@ -329,8 +329,8 @@ class ItemMaster
         }
 
         // Check if we're on the stock transfer page and need to show all departments
-        $showAllDepartments = isset($request['show_all_departments']) ? (bool)$request['show_all_departments'] : false;
-        $fromDepartmentId = isset($request['from_department_id']) ? (int)$request['from_department_id'] : 0;
+        $showAllDepartments = isset($request['show_all_departments']) ? (bool) $request['show_all_departments'] : false;
+        $fromDepartmentId = isset($request['from_department_id']) ? (int) $request['from_department_id'] : 0;
 
         // If showing all departments but we have a from_department_id (stock transfer case)
         if ($showAllDepartments && $fromDepartmentId > 0) {
@@ -361,7 +361,7 @@ class ItemMaster
             $itemIds = [];
             while ($row = mysqli_fetch_assoc($itemsQuery)) {
                 $items[] = $row;
-                $itemIds[] = (int)$row['id'];
+                $itemIds[] = (int) $row['id'];
             }
 
             // Prefetch aggregated department stocks for selected items
@@ -376,11 +376,12 @@ class ItemMaster
                 ";
                 $stockAggResult = $db->readQuery($stockAggSql);
                 while ($sRow = mysqli_fetch_assoc($stockAggResult)) {
-                    $iid = (int)$sRow['item_id'];
-                    if (!isset($deptStockMap[$iid])) $deptStockMap[$iid] = [];
+                    $iid = (int) $sRow['item_id'];
+                    if (!isset($deptStockMap[$iid]))
+                        $deptStockMap[$iid] = [];
                     $deptStockMap[$iid][] = [
-                        'department_id' => (int)$sRow['department_id'],
-                        'quantity' => (float)$sRow['quantity']
+                        'department_id' => (int) $sRow['department_id'],
+                        'quantity' => (float) $sRow['quantity']
                     ];
                 }
             }
@@ -396,7 +397,7 @@ class ItemMaster
                 // If stockOnly, filter out zero/negative quantities
                 if ($stockOnly) {
                     $deptStocks = array_values(array_filter($deptStocks, function ($ds) {
-                        return (float)$ds['quantity'] > 0;
+                        return (float) $ds['quantity'] > 0;
                     }));
                 }
 
@@ -424,17 +425,17 @@ class ItemMaster
                         "status" => $row['is_active'],
                         // For expanded rows, available_qty is the department quantity
                         "qty" => $row['total_qty'],
-                        "available_qty" => (float)$ds['quantity'],
+                        "available_qty" => (float) $ds['quantity'],
                         // department_stock contains only this department
                         "department_stock" => [
                             [
-                                'department_id' => (int)$ds['department_id'],
-                                'quantity' => (float)$ds['quantity']
+                                'department_id' => (int) $ds['department_id'],
+                                'quantity' => (float) $ds['quantity']
                             ]
                         ],
                         // Helper fields used by frontend to render department row
-                        "row_department_id" => (int)$ds['department_id'],
-                        "row_department_qty" => (float)$ds['quantity'],
+                        "row_department_id" => (int) $ds['department_id'],
+                        "row_department_qty" => (float) $ds['quantity'],
                         "status_label" => $row['is_active'] == 1
                             ? '<span class="badge bg-soft-success font-size-12">Active</span>'
                             : '<span class="badge bg-soft-danger font-size-12">Inactive</span>'
@@ -500,8 +501,8 @@ class ItemMaster
             $stockResult = $db->readQuery($stockQuery);
             while ($stockRow = mysqli_fetch_assoc($stockResult)) {
                 $departmentStocks[] = [
-                    'department_id' => (int)$stockRow['department_id'],
-                    'quantity' => (float)$stockRow['quantity']
+                    'department_id' => (int) $stockRow['department_id'],
+                    'quantity' => (float) $stockRow['quantity']
                 ];
             }
 
@@ -536,6 +537,7 @@ class ItemMaster
                 "stock_type" => $row['stock_type'],
                 "note" => $row['note'],
                 "status" => $row['is_active'],
+                "location_id" => $row['location_id'],
                 "qty" => $row['total_qty'],
                 "available_qty" => $departmentId > 0 ? $row['available_qty'] : $row['total_qty'],
                 "department_stock" => $departmentStocks,
@@ -669,7 +671,7 @@ class ItemMaster
         $db = Database::getInstance();
         $query = "SELECT id FROM item_master WHERE name = '" . mysqli_real_escape_string($db->DB_CON, $name) . "'";
         if ($excludeId !== null) {
-            $query .= " AND id != " . (int)$excludeId;
+            $query .= " AND id != " . (int) $excludeId;
         }
         $query .= " LIMIT 1";
         $result = $db->readQuery($query);
