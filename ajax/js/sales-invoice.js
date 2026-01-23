@@ -804,6 +804,7 @@ jQuery(document).ready(function () {
           $("#customer_name").val(data.customer_name);
           $("#customer_address").val(data.customer_address);
           $("#customer_mobile").val(data.mobile_number);
+          $("#customer_vehicle_no").val(data.vehicle_no || "");
           $("#recommended_person").val(data.recommended_person || ""); // Add recommended_person field // adjust key if needed
         } else {
           console.warn("No customer found");
@@ -1458,6 +1459,7 @@ jQuery(document).ready(function () {
     formData.append("customer_name", $("#customer_name").val());
     formData.append("customer_mobile", $("#customer_mobile").val());
     formData.append("customer_address", $("#customer_address").val());
+    formData.append("customer_vehicle_no", $("#customer_vehicle_no").val());
     formData.append("recommended_person", $("#recommended_person").val());
     formData.append("invoice_no", $("#invoice_no").val());
     formData.append("invoice_date", $("#invoice_date").val());
@@ -2374,6 +2376,7 @@ jQuery(document).ready(function () {
     $("#customer_name").val("");
     $("#customer_address").val("");
     $("#customer_mobile").val("");
+    $("#customer_vehicle_no").val("");
     $("#recommended_person").val("");
 
     // Set focus back to customer name for better UX

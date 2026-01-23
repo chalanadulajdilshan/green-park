@@ -640,6 +640,7 @@ jQuery(document).ready(function () {
         $("#customer_name").val(response.customer_name || "");
         $("#customer_address").val(response.customer_address || "");
         $("#customer_mobile").val(response.customer_mobile || "");
+        $("#customer_vehicle_no").val(response.customer_vehicle_no || "");
 
         // Set VAT information
         $("#customer_vat_no").val(response.vat_no || "");
