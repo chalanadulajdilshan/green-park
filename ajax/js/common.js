@@ -480,7 +480,7 @@ jQuery(document).ready(function () {
             : ""
           }</td>
                     <td>${inv.invoice_date}</td>
-                    <td>${inv.department_name}</td>
+                    <td>${inv.customer_vehicle_no || ''}</td>
                     <td>${inv.customer_name}</td>
                     <td>${inv.grand_total}</td>
                 </tr>
@@ -549,7 +549,10 @@ jQuery(document).ready(function () {
             const discountValue = parseFloat(item.discount) || 0;
             let row = `
                             <tr>
-                                <td>${item.item_code_name}</td>
+                                <td>
+                                    ${item.item_code_name}
+                                    <input type="hidden" name="item_codes[]" value="${item.item_code_name}">
+                                </td>
                                 <td>${item.display_name}</td>
                                 <td>${parseFloat(
               item.list_price || item.price
@@ -557,16 +560,17 @@ jQuery(document).ready(function () {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}</td>
-                                <td>${item.quantity}</td>
-                                <td>${discountValue}</td>
-                                <td>${parseFloat(item.price).toLocaleString(
+                                <td class="item-qty">${item.quantity}</td>
+                                <td class="item-discount">${discountValue}</td>
+                                <td class="item-price">${parseFloat(item.price).toLocaleString(
               undefined,
               {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               }
             )}</td>   
-                                <td>${parseFloat(item.total).toLocaleString(
+                                <td class="item-vat">${parseFloat(item.tax || 0).toFixed(2)}</td>
+                                <td class="item-total">${parseFloat(item.total).toLocaleString(
               undefined,
               {
                 minimumFractionDigits: 2,
@@ -584,14 +588,19 @@ jQuery(document).ready(function () {
           });
         } else {
           tbody.html(`<tr id="noItemRow">
-                                    <td colspan="8" class="text-center text-muted">No items found</td>
+                                    <td colspan="9" class="text-center text-muted">No items found</td>
                                 </tr>`);
+        }
+
+        // Update totals if updateFinalTotal is available
+        if (typeof window.updateFinalTotal === "function") {
+          window.updateFinalTotal();
         }
       },
       error: function (xhr, status, error) {
         console.error("Failed to fetch items:", error);
         $("#invoiceItemsBody").html(
-          `<tr><td colspan="8" class="text-center text-danger">Error loading items </td></tr>`
+          `<tr><td colspan="9" class="text-center text-danger">Error loading items </td></tr>`
         );
       },
     });

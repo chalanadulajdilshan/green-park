@@ -491,6 +491,7 @@ include './auth.php';
                                                             <th>Qty</th>
                                                             <th>Discount</th>
                                                             <th>Selling Price</th>
+                                                            <th>VAT</th>
                                                             <th>Total</th>
                                                             <th>Action</th>
                                                         </tr>

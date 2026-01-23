@@ -293,17 +293,19 @@ $CUSTOMER = new CustomerMaster($SALES_INVOICE->customer_id);
                                                             <th>Price</th>
                                                             <th>Qty</th>
                                                             <th>Discount</th>
+                                                            <th>VAT</th>
                                                             <th>Total</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody id="invoiceItemsBody">
                                                         <?php foreach ($SALES_INVOICE_ITEMS->getItemsByInvoiceId($invoice_id) as $item) { ?>
                                                             <tr>
-                                                                <td><?php echo $item['item_code'] ?></td>
+                                                                <td><?php echo $item['item_code_name'] ?></td>
                                                                 <td><?php echo $item['item_name'] ?></td>
                                                                 <td><?php echo $item['price'] ?></td>
                                                                 <td><?php echo $item['quantity'] ?></td>
                                                                 <td><?php echo $item['discount'] ?></td>
+                                                                <td><?php echo number_format($item['tax'], 2) ?></td>
                                                                 <td><?php echo $item['total'] ?></td>
 
                                                             </tr>

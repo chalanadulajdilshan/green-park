@@ -183,8 +183,9 @@ $CUSTOMER_MASTER = new CustomerMaster($SALES_INVOICE->customer_id);
                                 <tr>
                                     <th>No.</th>
                                     <th colspan="4">Item Name</th>
-                                    <th>Selling Price</th>
+                                    <th>Price</th>
                                     <th>Qty</th>
+                                    <th>VAT</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
@@ -209,7 +210,7 @@ $CUSTOMER_MASTER = new CustomerMaster($SALES_INVOICE->customer_id);
                                 ?>
                                     <tr>
                                         <td>0<?php echo $key; ?></td>
-                                        <td colspan="4"><?php echo $ITEM_MASTER->code . ' ' . $temp_items['display_name']; ?>
+                                        <td colspan="4"><?php echo $temp_items['item_code_name'] . ' ' . $temp_items['display_name']; ?>
                                             <?php if (!empty($temp_items['next_service_date']) && $temp_items['next_service_date'] !== '0000-00-00' && strtotime($temp_items['next_service_date']) > 0): ?>
                                                 <br><strong>Next Service Date:</strong> <?php echo date('d M, Y', strtotime($temp_items['next_service_date'])); ?>
                                             <?php elseif (!empty($temp_items['current_km'])): ?>
@@ -218,6 +219,7 @@ $CUSTOMER_MASTER = new CustomerMaster($SALES_INVOICE->customer_id);
                                         </td>
                                         <td><?php echo number_format($price, 2); ?></td>
                                         <td><?php echo $quantity; ?></td>
+                                        <td><?php echo number_format($temp_items['tax'], 2); ?></td>
                                         <td class="text-end"><?php echo number_format($line_total, 2); ?></td>
                                     </tr>
                                 <?php } ?>
@@ -259,7 +261,7 @@ $CUSTOMER_MASTER = new CustomerMaster($SALES_INVOICE->customer_id);
 
                                 <tr>
                                     <td colspan="2" class="text-end font-weight-bold"><strong>VAT :-</strong></td>
-                                    <td class="text-end font-weight-bold"><strong><?php echo number_format($SALES_INVOICE->tax, 2); ?></strong></td>
+                                    <td colspan="2" class="text-end font-weight-bold"><strong><?php echo number_format($SALES_INVOICE->tax, 2); ?></strong></td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" class="text-end"><strong>Net Amount:-</strong></td>
@@ -328,6 +330,7 @@ $CUSTOMER_MASTER = new CustomerMaster($SALES_INVOICE->customer_id);
                                     <th>Serial No</th>
                                     <th>Price</th>
                                     <th>Cost</th>
+                                    <th>VAT</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
@@ -372,6 +375,7 @@ $CUSTOMER_MASTER = new CustomerMaster($SALES_INVOICE->customer_id);
                                         <td><?php echo $serial_no; ?></td>
                                         <td><?php echo number_format($price, 2); ?></td>
                                         <td><?php echo number_format($cost, 2); ?></td>
+                                        <td><?php echo number_format($temp_items['tax'], 2); ?></td>
                                         <td class="text-end"><?php echo number_format($line_total, 2); ?></td>
                                     </tr>
                                 <?php } ?>

@@ -16,6 +16,8 @@ class SalesInvoiceItem
     public $vehicle_no;
     public $current_km;
     public $next_service_date;
+    public $tax;
+    public $service_item_id;
     public $created_at;
 
     public function __construct($id = null)
@@ -42,6 +44,8 @@ class SalesInvoiceItem
                 $this->vehicle_no = $result['vehicle_no'] ?? '';
                 $this->current_km = $result['current_km'] ?? '';
                 $this->next_service_date = $result['next_service_date'] ?? '';
+                $this->tax = $result['tax'] ?? 0;
+                $this->service_item_id = $result['service_item_id'] ?? 0;
                 $this->created_at = $result['created_at'];
             }
         }
@@ -52,16 +56,18 @@ class SalesInvoiceItem
 
 
         $query = "INSERT INTO `sales_invoice_items` 
-    (`invoice_id`, `item_code`, `service_item_code`, `item_name`,`cost`, `list_price`, `price`, `discount`,`quantity`, `total`, `vehicle_no`, `current_km`, `next_service_date`, `created_at`) 
+    (`invoice_id`, `item_code`, `service_item_code`, `service_item_id`, `item_name`,`cost`, `list_price`, `price`, `discount`,`tax`, `quantity`, `total`, `vehicle_no`, `current_km`, `next_service_date`, `created_at`) 
     VALUES (
         '{$this->invoice_id}', 
         '{$this->item_code}', 
         '{$this->service_item_code}', 
+        '{$this->service_item_id}', 
         '{$this->item_name}', 
         '{$this->cost}', 
         '{$this->list_price}', 
         '{$this->price}', 
         '{$this->discount}', 
+        '{$this->tax}', 
         '{$this->quantity}', 
         '{$this->total}',
         '{$this->vehicle_no}',
@@ -90,6 +96,8 @@ class SalesInvoiceItem
             `service_item_code` = '{$this->service_item_code}', 
             `item_name` = '{$this->item_name}', 
             `price` = '{$this->price}', 
+            `discount` = '{$this->discount}', 
+            `tax` = '{$this->tax}', 
             `quantity` = '{$this->quantity}', 
             `total` = '{$this->total}' 
             WHERE `id` = '{$this->id}'";
@@ -197,18 +205,23 @@ class SalesInvoiceItem
     
         while ($row = mysqli_fetch_assoc($result)) {
             // safely load item master
-            if ($row['item_code'] != 0) {
+            if (!empty($row['service_item_id']) && $row['service_item_id'] != 0) {
+                // Pure service (SV/)
+                $row['item_code_name'] = 'SV/' . str_pad($row['service_item_id'], 4, '0', STR_PAD_LEFT);
+            } elseif (!empty($row['service_item_code']) && $row['service_item_code'] != 0) {
+                // Service item (SI/)
+                $service_item_master = new ServiceItem($row['service_item_code']);
+                $row['item_code_name'] = $service_item_master->item_code ?? ('SI/' . str_pad($row['service_item_code'], 4, '0', STR_PAD_LEFT));
+            } elseif (!empty($row['item_code']) && $row['item_code'] != 0) {
+                // Regular item (TI/)
                 $item_master = new ItemMaster($row['item_code']);
                 if (!empty($item_master->code)) {
                     $row['item_code_name'] = $item_master->code;
                 } else {
-                    // Check if it's a pure service (SV/) - item_code stores service ID
-                    // Format as SV/0000 to match the display format used when adding items
-                    $row['item_code_name'] = 'SV/' . str_pad($row['item_code'], 4, '0', STR_PAD_LEFT);
+                    $row['item_code_name'] = 'TI/' . str_pad($row['item_code'], 4, '0', STR_PAD_LEFT);
                 }
             } else {
-                 $service_item_master = new ServiceItem($row['service_item_code']);
-                 $row['item_code_name'] = $service_item_master->item_code ?? '';
+                $row['item_code_name'] = '';
             }
             
             // Extract clean item name for display (remove ARN metadata)

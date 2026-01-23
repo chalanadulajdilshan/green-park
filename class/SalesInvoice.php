@@ -30,6 +30,7 @@ class SalesInvoice
     public $credit_period;
     public $due_date;
     public $is_return;
+    public $is_vat;
 
     // Constructor to initialize the SalesInvoice object with an ID
     public function __construct($id = null)
@@ -68,6 +69,7 @@ class SalesInvoice
                 $this->credit_period = $result['credit_period'];
                 $this->due_date = $result['due_date'];
                 $this->is_return = $result['is_return'];
+                $this->is_vat = $result['is_vat'] ?? 0;
             }
         }
     }
@@ -78,11 +80,11 @@ class SalesInvoice
         $query = "INSERT INTO `sales_invoice` (
             `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_address`, `customer_vehicle_no`, `recommended_person`, `department_id`, 
             `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, 
-            `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`
+            `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`, `is_vat`
         ) VALUES (
             '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_address}', '{$this->customer_vehicle_no}', '{$this->recommended_person}', '{$this->department_id}', 
             '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', 
-            '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}'
+            '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}', '{$this->is_vat}'
         )";
 
 
@@ -119,7 +121,8 @@ class SalesInvoice
             `discount` = '{$this->discount}', 
             `tax` = '{$this->tax}', 
             `grand_total` = '{$this->grand_total}', 
-            `remark` = '{$this->remark}' 
+            `remark` = '{$this->remark}',
+            `is_vat` = '{$this->is_vat}'
             WHERE `id` = '{$this->id}'";
 
         $db = Database::getInstance();
