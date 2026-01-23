@@ -22,7 +22,7 @@
                                         <th>#ID</th>
                                         <th>Invoice No</th>
                                         <th>Date</th>
-                                        <th>Department</th>
+                                        <th>Vehicle Number</th>
                                         <th>Customer</th>
                                         <th>Grand Total</th>
                                     </tr>

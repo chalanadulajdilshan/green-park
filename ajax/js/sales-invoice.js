@@ -1272,14 +1272,21 @@ jQuery(document).ready(function () {
     $("#invoiceItemsBody tr").each(function () {
       const code = $(this).find("td:eq(0)").text().trim();
       const name = $(this).find("td:eq(1)").text().trim();
-      const price = parseFloat($(this).find("td:eq(2)").text()) || 0;
+      const price = parseFloat($(this).find("td:eq(2)").text()) ||
+        parseFloat($(this).find("td:eq(2) input").val()) || 0;
+      const qty = parseFloat($(this).find("td:eq(3)").text()) ||
+        parseFloat($(this).find("td:eq(3) input").val()) || 0;
+      const discount = parseFloat($(this).find("td:eq(4)").text()) ||
+        parseFloat($(this).find("td:eq(4) input").val()) || 0;
+      const selling_price = parseFloat($(this).find("td:eq(5)").text()) ||
+        parseFloat($(this).find("td:eq(5) input").val()) || 0;
 
-      let qty = parseFloat($(this).find("td:eq(3)").text()) || 0;
-      const discount = parseFloat($(this).find("td:eq(4)").text()) || 0;
-      const selling_price = parseFloat($(this).find("td:eq(5)").text()) || 0;
+      const totalItem = parseFloat($(this).find("td:eq(7)").text()) ||
+        parseFloat($(this).find("td:eq(7) input").val()) || 0;
+      const taxItem = parseFloat($(this).find(".item-vat").text()) || 0;
 
-      const totalItem = parseFloat($(this).find("td:eq(6)").text()) || 0;
-      const item_id = $(this).find('input[name="item_id[]"]').val();
+      const item_id = $(this).find('input[name="item_id[]"]').val() ||
+        $(this).find('.item-id').val();
       const arn_no = $(this).find('input[name="arn_ids[]"]').val();
       const arn_cost =
         parseFloat($(this).find('input[name="arn_costs[]"]').val()) || price;
@@ -1299,6 +1306,7 @@ jQuery(document).ready(function () {
           qty,
           discount,
           selling_price,
+          tax: taxItem,
           total: totalItem,
           cost: arn_cost, // Using ARN cost instead of price
           arn_no,
@@ -1970,6 +1978,7 @@ jQuery(document).ready(function () {
                 <td class="item-sell-price">${(price - discount).toFixed(
         2
       )}</td>
+                <td class="item-vat">0.00</td>
                 <td>${serviceTotal.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -2008,6 +2017,7 @@ jQuery(document).ready(function () {
                 <td class="item-sell-price">${serviceItemUnitPrice.toFixed(
         2
       )}</td>
+                <td class="item-vat">0.00</td>
                 <td>${serviceItemTotal.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -2055,6 +2065,7 @@ jQuery(document).ready(function () {
                 <td class="item-sell-price">${(displayPrice - discount).toFixed(
         2
       )}</td>
+                <td class="item-vat">0.00</td>
                 <td>${total.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -2144,10 +2155,14 @@ jQuery(document).ready(function () {
       const itemDiscount = discount * qty; // Multiply per-unit discount by quantity
       let itemTax = 0;
 
-      console.log("Item - Qty:", qty, "Price:", price, "Discount:", discount);
+      // Get item code to check if it's a service
+      const code = $(this).find('input[name="item_codes[]"]').val() || "";
+      const isService = code.startsWith("SV") || code.startsWith("SI");
 
-      // Calculate VAT only if VAT is applied
-      if (isVatApplied && vatPercentage > 0) {
+      console.log("Item - Code:", code, "Qty:", qty, "Price:", price, "Discount:", discount, "isService:", isService);
+
+      // Calculate VAT only if VAT is applied and it's not a service
+      if (isVatApplied && vatPercentage > 0 && !isService) {
         const discountedItemTotal = itemTotal - itemDiscount;
         itemTax = discountedItemTotal * (vatPercentage / 100);
         console.log(
@@ -2157,6 +2172,9 @@ jQuery(document).ready(function () {
           discountedItemTotal
         );
       }
+
+      // Update per-item VAT display
+      $(this).find(".item-vat").text(itemTax.toFixed(2));
 
       subTotal += itemTotal;
       discountTotal += itemDiscount;
@@ -2434,9 +2452,10 @@ jQuery(document).ready(function () {
                                 <td><input type="number" class="item-price form-control form-control-sm price"   value="${price}"  ></td>
                                 <td><input type="number" class="item-qty form-control form-control-sm qty" value="${qty}"></td>
                                 <td><input type="number" class="item-discount form-control form-control-sm discount" value="${discount}"></td>
+                                <td class="item-vat">0.00</td>
                                 <td><input type="text" class="item-total form-control form-control-sm totalPrice"  value="${total.toFixed(
                   2
-                )}" readonly>
+                )}" readonly></td>
                                 <td><button type="button" class="btn btn-sm btn-danger btn-remove-item" onclick="removeRow(this)">Remove</button></td>
                             </tr>
                             `;
@@ -2792,4 +2811,5 @@ jQuery(document).ready(function () {
   });
 
   // ---------------------- END QUOTATION SELECTION SECTION ---------------------- //
+  window.updateFinalTotal = updateFinalTotal;
 });

@@ -206,6 +206,7 @@ if (isset($_POST['create'])) {
 
     $totalSubTotal = 0;
     $totalDiscount = 0;
+    $taxableAmount = 0;
     $final_cost = 0;
 
     // Calculate subtotal and discount
@@ -228,12 +229,12 @@ if (isset($_POST['create'])) {
         $ITEM_MASTER = new ItemMaster($item['item_id']);
 
 
-        if (substr($item['code'], 0, 2) !== 'SI') {
+        if (substr($item['code'], 0, 3) !== 'SI/' && substr($item['code'], 0, 3) !== 'SV/') {
             $ARN_ITEM = new ArnItem(NULL);
             $cost = $ARN_ITEM->getArnCostByArnId($arn_id);
             $final_cost_item = $cost * $item['qty'];
             $final_cost += $final_cost_item;
-        } else {
+        } elseif (substr($item['code'], 0, 3) === 'SI/') {
             $SERVICE_ITEM = new ServiceItem($item['item_id']);
             $final_cost_item = $SERVICE_ITEM->cost * $item['service_qty'];
             $final_cost += $final_cost_item;
@@ -241,30 +242,35 @@ if (isset($_POST['create'])) {
             $available_qty = $SERVICE_ITEM->qty - $item['service_qty'];
             $SERVICE_ITEM->qty = $available_qty;
             $SERVICE_ITEM->update();
+        } else {
+            // Pure service (SV/) - typically cost is 0 or handled differently
+            $final_cost_item = 0; 
+            $final_cost += $final_cost_item;
         }
 
         $itemTotal = $price * $qty;
         $discount_amount = $discount_per_unit * $qty;
         $totalSubTotal += $itemTotal;
         $totalDiscount += $discount_amount;
+
+        // Calculate VAT base (exclude SI and SV)
+        if (substr($item['code'], 0, 2) !== 'SI' && substr($item['code'], 0, 2) !== 'SV') {
+            $taxableAmount += ($itemTotal - $discount_amount);
+        }
     }
     $netTotal = $totalSubTotal - $totalDiscount;
 
     $USER = new User($_SESSION['id']);
     $COMPANY_PROFILE = new CompanyProfile($USER->company_id);
 
-
-
-
-    
-    // VAT calculation - apply only when explicitly selected
+    // VAT calculation - apply only when explicitly selected and only on non-service taxable amount
     $tax = 0;
     $isVatInvoice = isset($_POST['is_vat_invoice']) && $_POST['is_vat_invoice'] == '1';
 
     if ($isVatInvoice) {
         $vat_percentage = $COMPANY_PROFILE->vat_percentage;
         if ($vat_percentage > 0) {
-            $tax = round(($netTotal * $vat_percentage) / 100, 2);
+            $tax = round(($taxableAmount * $vat_percentage) / 100, 2);
         }
     }
 
@@ -294,6 +300,7 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->sub_total = $totalSubTotal;
     $SALES_INVOICE->discount = $totalDiscount;
     $SALES_INVOICE->tax = $tax;
+    $SALES_INVOICE->is_vat = $isVatInvoice ? 1 : 0;
     $SALES_INVOICE->grand_total = $grandTotal;
     $SALES_INVOICE->outstanding_settle_amount = $_POST['paidAmount'];
     $SALES_INVOICE->remark = !empty($_POST['remark']) ? $_POST['remark'] : null;
@@ -367,20 +374,28 @@ if (isset($_POST['create'])) {
 
             $SALES_ITEM->invoice_id = $invoiceTableId;
 
-            if (substr($item['code'], 0, 2) !== 'SI') {
-                // Regular item
-                $SALES_ITEM->item_code = $item['item_id'];
+            if (substr($item['code'], 0, 3) === 'SV/') {
+                 // Pure service
+                $SALES_ITEM->item_code = 0;
+                $SALES_ITEM->service_item_id = $item['item_id'];
                 $SALES_ITEM->quantity = $item['qty'];
                 $qty_for_total = $item['qty'];
-                $qty_for_stock = $item['qty']; // Use regular qty for stock management
-            } else {
-                // Service item - use the actual quantity from the table (which is service_qty)
+                $qty_for_stock = 0; 
+            } elseif (substr($item['code'], 0, 3) === 'SI/') {
+                // Service item
+                $SALES_ITEM->item_code = 0;
                 $SALES_ITEM->service_item_code = $item['item_id'];
                 // Use qty from table cell (which contains serviceQty for service items)
                 $service_item_qty = !empty($item['service_qty']) ? $item['service_qty'] : $item['qty'];
                 $SALES_ITEM->quantity = $service_item_qty;
-                $qty_for_total = $service_item_qty; // Use actual qty for price calculations
-                $qty_for_stock = $service_item_qty; // Use actual qty for stock management
+                $qty_for_total = $service_item_qty;
+                $qty_for_stock = $service_item_qty;
+            } else {
+                // Regular item
+                $SALES_ITEM->item_code = $item['item_id'];
+                $SALES_ITEM->quantity = $item['qty'];
+                $qty_for_total = $item['qty'];
+                $qty_for_stock = $item['qty'];
             }
 
             $item_discount_amount = $item_discount_per_unit * $qty_for_total;
@@ -391,6 +406,7 @@ if (isset($_POST['create'])) {
             $SALES_ITEM->price = $item['selling_price']; // Save the actual selling price (price after discount per unit)
             $SALES_ITEM->cost = $item['cost']; // Set the cost field
             $SALES_ITEM->discount = $item_discount_amount;
+            $SALES_ITEM->tax = isset($item['tax']) ? (float)$item['tax'] : 0;
             $SALES_ITEM->total = ($item['selling_price'] * $qty_for_total);
             $SALES_ITEM->vehicle_no = isset($item['vehicle_no']) ? $item['vehicle_no'] : '';
             $SALES_ITEM->current_km = isset($item['current_km']) ? $item['current_km'] : '';
