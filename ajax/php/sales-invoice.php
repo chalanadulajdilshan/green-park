@@ -4,6 +4,63 @@ include '../../class/include.php';
 header('Content-Type: application/json; charset=UTF8');
 
 
+// Fetch latest invoices for modal
+if (isset($_POST['action']) && $_POST['action'] === 'latest') {
+    $db = Database::getInstance();
+    $query = "SELECT 
+                si.*, 
+                dm.name AS department_name, 
+                cm.name AS customer_name
+            FROM sales_invoice si
+            LEFT JOIN department_master dm ON dm.id = si.department_id
+            LEFT JOIN customer_master cm ON cm.id = si.customer_id
+            ORDER BY si.id DESC
+            LIMIT 10";
+
+    $result = $db->readQuery($query);
+    $data = [];
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+
+    echo json_encode(['data' => $data]);
+    exit();
+}
+
+// Search invoices by text (invoice no, customer, department, vehicle)
+if (isset($_POST['action']) && $_POST['action'] === 'search') {
+    $q = trim($_POST['q'] ?? '');
+    $db = Database::getInstance();
+    $conn = $db->DB_CON;
+    $escaped = mysqli_real_escape_string($conn, $q);
+
+    $query = "SELECT 
+                si.*, 
+                dm.name AS department_name, 
+                cm.name AS customer_name
+            FROM sales_invoice si
+            LEFT JOIN department_master dm ON dm.id = si.department_id
+            LEFT JOIN customer_master cm ON cm.id = si.customer_id
+            WHERE 
+                si.invoice_no LIKE '%$escaped%' OR
+                cm.name LIKE '%$escaped%' OR
+                dm.name LIKE '%$escaped%' OR
+                si.customer_vehicle_no LIKE '%$escaped%'
+            ORDER BY si.id DESC
+            LIMIT 50";
+
+    $result = $db->readQuery($query);
+    $data = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+
+    echo json_encode(['data' => $data]);
+    exit();
+}
+
+
 if (isset($_POST['action']) && $_POST['action'] == 'check_invoice_id') {
 
 
@@ -227,6 +284,7 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->customer_name = ucwords(strtolower(trim($_POST['customer_name'])));
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
     $SALES_INVOICE->customer_address = ucwords(strtolower(trim($_POST['customer_address'])));
+    $SALES_INVOICE->customer_vehicle_no = isset($_POST['customer_vehicle_no']) ? trim($_POST['customer_vehicle_no']) : null;
     $SALES_INVOICE->recommended_person = isset($_POST['recommended_person']) ? ucwords(strtolower(trim($_POST['recommended_person']))) : null;
     $SALES_INVOICE->department_id = $_POST['department_id'];
     $SALES_INVOICE->sale_type = $_POST['sales_type'];
@@ -235,7 +293,6 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->payment_type = $paymentType;
     $SALES_INVOICE->sub_total = $totalSubTotal;
     $SALES_INVOICE->discount = $totalDiscount;
-    $SALES_INVOICE->is_vat = isset($_POST['is_vat']) ? $_POST['is_vat'] : 0;
     $SALES_INVOICE->tax = $tax;
     $SALES_INVOICE->grand_total = $grandTotal;
     $SALES_INVOICE->outstanding_settle_amount = $_POST['paidAmount'];
@@ -491,6 +548,10 @@ if (isset($_POST['get_by_id'])) {
     $response['customer_address'] = $CUSTOMER_MASTER->address;
     $response['customer_vat_no'] = $CUSTOMER_MASTER->vat_no;
     $response['customer_mobile'] = $CUSTOMER_MASTER->mobile_number;
+    // Preserve invoice vehicle number; only fall back to customer master if missing
+    if (!isset($response['customer_vehicle_no']) || $response['customer_vehicle_no'] === null || $response['customer_vehicle_no'] === '') {
+        $response['customer_vehicle_no'] = $CUSTOMER_MASTER->vehicle_no ?? null;
+    }
 
     $response['vat_no'] = $CUSTOMER_MASTER->vat_no;
 
