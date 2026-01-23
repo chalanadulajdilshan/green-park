@@ -699,11 +699,14 @@ jQuery(document).ready(function () {
         // Show cancel button if invoice is not cancelled
         if (response.is_cancel == 1) {
           $("#cancelled-badge").show();
+          $("#cancel-remark-container").show();
+          $("#cancel-remark-text").text(response.cancel_remark || "No reason recorded");
           $("#payment").hide();
           $("#save").hide();
           $("#update").hide();
         } else {
           $("#cancelled-badge").hide();
+          $("#cancel-remark-container").hide();
           $("#payment").show();
           $("#save").show();
           $("#update").show();

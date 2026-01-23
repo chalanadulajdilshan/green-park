@@ -575,6 +575,11 @@ if (isset($_POST['get_by_id'])) {
 
     $response['recommended_person'] = $response['recommended_person'] ?? null;
 
+    // Fetch cancellation remark if cancelled
+    if ($response['is_cancel'] == 1) {
+        $response['cancel_remark'] = $response['remark'] ?? "No reason recorded";
+    }
+
     echo json_encode($response);
     exit;
 }
@@ -628,8 +633,10 @@ if (isset($_POST['action']) && $_POST['action'] == 'cancel') {
 
     $invoiceId = $_POST['id'];
     $arnIds = isset($_POST['arnIds']) ? $_POST['arnIds'] : [];
+    $remark = isset($_POST['remark']) ? $_POST['remark'] : 'No reason provided';
 
     $SALES_INVOICE = new SalesInvoice($invoiceId);
+    $SALES_INVOICE->remark = $remark;
 
 
 
@@ -708,7 +715,8 @@ if (isset($_POST['action']) && $_POST['action'] == 'cancel') {
         $AUDIT_LOG->ref_id = $invoiceId;
         $AUDIT_LOG->ref_code = $invoiceId;
         $AUDIT_LOG->action = 'CANCEL';
-        $AUDIT_LOG->description = 'CANCEL INVOICE NO #' . $SALES_INVOICE->invoice_no;
+        $remark = isset($_POST['remark']) ? $_POST['remark'] : 'No reason provided';
+        $AUDIT_LOG->description = 'CANCEL INVOICE NO #' . $SALES_INVOICE->invoice_no . ' - Reason: ' . $remark;
         $AUDIT_LOG->user_id = $_SESSION['id'];
         $AUDIT_LOG->created_at = date("Y-m-d H:i:s");
         $result =   $AUDIT_LOG->create();

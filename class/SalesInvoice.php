@@ -143,10 +143,10 @@ class SalesInvoice
             return ['success' => false, 'reason' => 'returned', 'message' => 'Cannot cancel invoice that has been returned. Please process returns separately.'];
         }
         // Use prepared statement to prevent SQL injection
-        $query = "UPDATE `sales_invoice` SET `is_cancel` = 1 WHERE `id` = $this->id";
+        $query = "UPDATE `sales_invoice` SET `is_cancel` = 1, `remark` = '{$this->remark}' WHERE `id` = $this->id";
 
         $db = Database::getInstance();
-        $result = $db->readQuery($query); // Assuming your Database class supports parameters
+        $result = $db->readQuery($query);
 
          if ($result) {
             return ['success' => true, 'message' => 'Invoice cancelled successfully'];

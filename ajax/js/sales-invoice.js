@@ -2323,15 +2323,23 @@ jQuery(document).ready(function () {
 
     swal(
       {
-        title: "Are you sure?",
-        text: "You will not be able to recover this approvel course request.!",
-        type: "warning",
+        title: "Cancel Invoice?",
+        text: "Please enter the reason for cancellation:",
+        type: "input",
         showCancelButton: true,
         confirmButtonColor: "#DD6B55",
-        confirmButtonText: "Yes, Cancel it!",
+        confirmButtonText: "Cancel Invoice",
+        cancelButtonText: "Back",
         closeOnConfirm: false,
+        inputPlaceholder: "Reason for cancellation...",
       },
-      function () {
+      function (inputValue) {
+        if (inputValue === false) return false;
+        if (inputValue === "") {
+          swal.showInputError("Cancellation reason is mandatory!");
+          return false;
+        }
+
         $.ajax({
           url: "ajax/php/sales-invoice.php",
           type: "POST",
@@ -2339,6 +2347,7 @@ jQuery(document).ready(function () {
             action: "cancel",
             id: invoiceId,
             arnIds: arnIds,
+            remark: inputValue,
           },
           dataType: "JSON",
           success: function (jsonStr) {
