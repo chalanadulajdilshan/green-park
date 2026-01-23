@@ -58,6 +58,7 @@ if (isset($data['create'])) {
     $ARN->credit_note_amount = $data['credit_note_amount'];
     $ARN->delivery_date = $data['delivery_date'];
     $ARN->invoice_date = $data['invoice_date'];
+    $ARN->due_date = isset($data['due_date']) ? $data['due_date'] : null;
     $ARN->entry_date = $data['entry_date'];
     $ARN->total_arn_value = $data['total_arn'];
     $ARN->total_discount = $data['total_discount'];
@@ -127,6 +128,7 @@ if (isset($data['create'])) {
             $ARN_ITEM->unit_total = $item['unit_total'];
             $ARN_ITEM->list_price = $item['list_price'];
             $ARN_ITEM->invoice_price = $item['invoice_price'];
+            $ARN_ITEM->year = isset($item['year']) ? $item['year'] : null;
             $ARN_ITEM->created_at = date("Y-m-d H:i:s");
             $ARN_ITEM->create();
 

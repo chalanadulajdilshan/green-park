@@ -297,6 +297,15 @@ $arn_id = $COMPANY_PROFILE_DETAILS->company_code . '/ARN/00/' . ($lastId + 1);
                                                 </div>
                                             </div>
 
+                                            <div class="col-md-2" id="due_date_container" style="display: none;">
+                                                <label for="due_date" class="form-label">Due Date <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control date-picker"
+                                                        id="due_date" name="due_date"> <span
+                                                        class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                                </div>
+                                            </div>
+
                                             <div class="col-md-2">
                                                 <label for="name" class="form-label">Delivery Date</label>
                                                 <div class="input-group">
@@ -375,14 +384,9 @@ $arn_id = $COMPANY_PROFILE_DETAILS->company_code . '/ARN/00/' . ($lastId + 1);
                                                     <label class="form-label">Dis 3 %</label>
                                                     <input type="number" id="dis_3" class="form-control form-control-sm">
                                                 </div>
-                                                <div class="col-6 col-sm-4 col-md-2 col-lg-1">
-                                                    <label class="form-label">Dis 4 %</label>
-                                                    <input type="number" id="dis_4" class="form-control form-control-sm">
-                                                </div>
-                                                <div class="col-6 col-sm-4 col-md-2 col-lg-1">
-                                                    <label class="form-label">Dis 5 %</label>
-                                                    <input type="number" id="dis_5" class="form-control form-control-sm">
-                                                </div>
+
+                                                <input type="hidden" id="dis_4">
+                                                <input type="hidden" id="dis_5">
 
                                                 <input type="hidden" id="dis_6">
                                                 <input type="hidden" id="dis_7">
@@ -398,6 +402,19 @@ $arn_id = $COMPANY_PROFILE_DETAILS->company_code . '/ARN/00/' . ($lastId + 1);
                                                     <label class="form-label">Selling Price</label>
                                                     <input type="text" id="invoice_price"
                                                         class="form-control form-control-sm">
+                                                </div>
+
+                                                <div class="col-6 col-sm-4 col-md-2 col-lg-1">
+                                                    <label class="form-label">Year</label>
+                                                    <select id="item_year" name="item_year" class="form-select form-select-sm">
+                                                        <option value="">-- Select Year --</option>
+                                                        <?php
+                                                        $currentYear = date('Y');
+                                                        for ($y = $currentYear; $y >= $currentYear - 10; $y--) {
+                                                            echo "<option value=\"$y\">$y</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
                                                 </div>
 
 
@@ -427,11 +444,10 @@ $arn_id = $COMPANY_PROFILE_DETAILS->company_code . '/ARN/00/' . ($lastId + 1);
                                                         <th>Brand Dis%</th>
                                                         <th>Item Dis%</th>
                                                         <th>Dis 3%</th>
-                                                        <th>Dis 4%</th>
-                                                        <th>Dis 5%</th>
                                                         <th>Actual Cost</th>
                                                         <th>Unit Total</th>
                                                         <th>Selling Price</th>
+                                                        <th>Year</th>
                                                         <th>Action</th>
                                                     </tr>
                                                 </thead>
@@ -652,6 +668,7 @@ $arn_id = $COMPANY_PROFILE_DETAILS->company_code . '/ARN/00/' . ($lastId + 1);
                                             data-order_date="<?= htmlspecialchars($arn_master['po_date'] ?? ''); ?>"
                                             data-entry_date="<?= htmlspecialchars($arn_master['entry_date'] ?? ''); ?>"
                                             data-invoice_date="<?= htmlspecialchars($arn_master['invoice_date'] ?? ''); ?>"
+                                            data-due_date="<?= htmlspecialchars($arn_master['due_date'] ?? ''); ?>"
                                             data-supplier_id="<?= htmlspecialchars($arn_master['supplier_id'] ?? ''); ?>"
                                             data-supplier_code="<?= htmlspecialchars($CUSTOMER_MASTER->code ?? ''); ?>"
                                             data-supplier_name="<?= htmlspecialchars($CUSTOMER_MASTER->name ?? ''); ?>"

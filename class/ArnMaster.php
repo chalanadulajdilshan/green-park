@@ -33,6 +33,7 @@ class ArnMaster
     public $is_cancelled;
     public $paid_amount;
     public $payment_type;
+    public $due_date;
 
     public function __construct($id = null)
     {
@@ -99,14 +100,14 @@ class ArnMaster
         $query = "INSERT INTO `arn_master` (
             `arn_no`, `lc_tt_no`, `pi_no`, `po_date`, `supplier_id`, `ci_no`, `bl_no`,
             `container_size`, `category`, `brand`, `department`, `po_no`, `country`, `order_by`,
-            `purchase_type`, `arn_status`, `remark`, `invoice_date`, `entry_date`, `delivery_date`,
+            `purchase_type`, `arn_status`, `remark`, `invoice_date`, `due_date`, `entry_date`, `delivery_date`,
             `credit_note_amount`, `sub_arn_value`, `total_discount`, `total_arn_value`, `paid_amount`,
             `total_received_qty`, `total_order_qty`, `created_at`
         ) VALUES (
             '{$this->arn_no}', '{$this->lc_tt_no}', '{$this->pi_no}', '{$this->po_date}', '{$this->supplier_id}',
             '{$this->ci_no}', '{$this->bl_no}', '{$this->container_size}', '{$this->category}', '{$this->brand}',
             '{$this->department}', '{$this->po_no}', '{$this->country}', '{$this->order_by}', '{$this->payment_type}',
-            '{$this->arn_status}', '{$this->remark}', '{$this->invoice_date}', '{$this->entry_date}', '{$this->delivery_date}',
+            '{$this->arn_status}', '{$this->remark}', '{$this->invoice_date}', '{$this->due_date}', '{$this->entry_date}', '{$this->delivery_date}',
             '{$this->credit_note_amount}', '{$this->sub_arn_value}', '{$this->total_discount}', '{$this->total_arn_value}',
             '{$this->paid_amount}', '{$this->total_received_qty}', '{$this->total_order_qty}', NOW()
         )";
@@ -143,6 +144,7 @@ class ArnMaster
             `arn_status` = '{$this->arn_status}',
             `remark` = '{$this->remark}',
             `invoice_date` = '{$this->invoice_date}',
+            `due_date` = '{$this->due_date}',
             `entry_date` = '{$this->entry_date}',
             `delivery_date` = '{$this->delivery_date}',
             `credit_note_amount` = '{$this->credit_note_amount}',
@@ -292,6 +294,30 @@ class ArnMaster
         $array_res = array();
 
         while ($row = mysqli_fetch_array($result)) {
+            $array_res[] = $row;
+        }
+
+        return $array_res;
+    }
+
+    public function getUpcomingDueArns($days = 7)
+    {
+        $db = Database::getInstance();
+        $today = date('Y-m-d');
+        $futureDate = date('Y-m-d', strtotime("+$days days"));
+
+        $query = "SELECT am.*, cm.code as supplier_code, cm.name as supplier_name 
+                  FROM `arn_master` am
+                  LEFT JOIN `customer_master` cm ON am.supplier_id = cm.id
+                  WHERE am.due_date BETWEEN '$today' AND '$futureDate' 
+                  AND am.total_arn_value > am.paid_amount
+                  AND am.is_cancelled = 0
+                  ORDER BY am.due_date ASC";
+
+        $result = $db->readQuery($query);
+        $array_res = [];
+
+        while ($row = mysqli_fetch_assoc($result)) {
             $array_res[] = $row;
         }
 

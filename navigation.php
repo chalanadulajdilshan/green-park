@@ -358,7 +358,21 @@ if ($homeViewMode === 'nav_buttons' || $homeViewMode === 'header') {
                         <?php
                                 endif;
                             endif;
-                        endforeach; ?>
+                             endforeach; ?>
+                        
+                        <?php
+                        $nv_ARN_MASTER = new ArnMaster();
+                        $nv_upcomingArns = $nv_ARN_MASTER->getUpcomingDueArns(7);
+                        $nv_dueCount = count($nv_upcomingArns);
+                        ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="upcoming-due-notifications.php">
+                                <i class="uil-bell me-2"></i> Due Notifications
+                                <?php if ($nv_dueCount > 0): ?>
+                                    <span class="badge rounded-pill bg-danger float-end"><?php echo $nv_dueCount; ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>

@@ -114,6 +114,7 @@ jQuery(document).ready(function () {
         },
       },
       { data: "category", title: "Category" },
+      { data: "location", title: "Location" },
 
       {
         data: "list_price",
@@ -160,9 +161,9 @@ jQuery(document).ready(function () {
             const stock = data.find((s) => s.department_id == departmentId);
             return stock
               ? parseFloat(stock.quantity || 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
               : "0.00";
           }
           return "0.00";
@@ -278,17 +279,17 @@ jQuery(document).ready(function () {
           const data = resp.data;
           $("#total-cost").text(
             "Rs. " +
-              parseFloat(data.total_cost || 0).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
+            parseFloat(data.total_cost || 0).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
           );
           $("#total-invoice").text(
             "Rs. " +
-              parseFloat(data.total_invoice || 0).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
+            parseFloat(data.total_invoice || 0).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
           );
           $("#profit-percentage").text(
             parseFloat(data.profit_percentage || 0).toLocaleString("en-US", {
@@ -474,8 +475,8 @@ jQuery(document).ready(function () {
       // Prefer item-master page_id injected from PHP, fallback to navigation anchor
       let pageId =
         typeof window !== "undefined" &&
-        window.ITEM_MASTER_PAGE_ID &&
-        Number(window.ITEM_MASTER_PAGE_ID) > 0
+          window.ITEM_MASTER_PAGE_ID &&
+          Number(window.ITEM_MASTER_PAGE_ID) > 0
           ? Number(window.ITEM_MASTER_PAGE_ID)
           : null;
 
@@ -518,11 +519,9 @@ jQuery(document).ready(function () {
       }
 
       const itemId = rowData.id;
-      const url = `item-master.php?page_id=${pageId}&from=live_stock&prefill_item_id=${
-        itemId || ""
-      }&prefill_item_code=${encodeURIComponent(itemCode)}${
-        depId ? `&department_id=${depId}` : ""
-      }`;
+      const url = `item-master.php?page_id=${pageId}&from=live_stock&prefill_item_id=${itemId || ""
+        }&prefill_item_code=${encodeURIComponent(itemCode)}${depId ? `&department_id=${depId}` : ""
+        }`;
       window.location.href = url;
     }
   });
@@ -570,7 +569,7 @@ jQuery(document).ready(function () {
         } else {
           showAlert(
             "Failed to retrieve export data: " +
-              (response.message || "Unknown error"),
+            (response.message || "Unknown error"),
             "error"
           );
         }
@@ -586,8 +585,8 @@ jQuery(document).ready(function () {
             btn.attr("id") === "exportAllStock"
               ? "Export All Stock"
               : btn.attr("id") === "exportToExcel"
-              ? "Export to Excel"
-              : "Export to PDF";
+                ? "Export to Excel"
+                : "Export to PDF";
           btn.html(text);
           btn.prop("disabled", false);
         });
@@ -723,21 +722,17 @@ jQuery(document).ready(function () {
           <td><strong>${item.code || "-"}</strong></td>
           <td>${item.name || "-"}</td>
           <td>${item.category || "-"}</td>
-          <td class="text-right">${
-            item.list_price ? parseFloat(item.list_price).toFixed(2) : "0.00"
-          }</td>
-          <td class="text-right">${
-            item.invoice_price
-              ? parseFloat(item.invoice_price).toFixed(2)
-              : "0.00"
-          }</td>
-          <td class="text-right">${
-            item.quantity ? parseFloat(item.quantity).toFixed(2) : "0.00"
-          }</td>
+          <td class="text-right">${item.list_price ? parseFloat(item.list_price).toFixed(2) : "0.00"
+        }</td>
+          <td class="text-right">${item.invoice_price
+          ? parseFloat(item.invoice_price).toFixed(2)
+          : "0.00"
+        }</td>
+          <td class="text-right">${item.quantity ? parseFloat(item.quantity).toFixed(2) : "0.00"
+        }</td>
           <td class="text-center">
-            <span class="status-badge" style="background-color: ${
-              statusStyle.bg
-            }; color: ${statusStyle.color}">
+            <span class="status-badge" style="background-color: ${statusStyle.bg
+        }; color: ${statusStyle.color}">
               ${item.stock_status || "-"}
             </span>
           </td>
@@ -785,8 +780,8 @@ jQuery(document).ready(function () {
                   <td class="text-right">${listPrice.toFixed(2)}</td>
                   <td class="text-right">${invoicePrice.toFixed(2)}</td>
                   <td class="text-right"><strong>${totalInvoice.toFixed(
-                    2
-                  )}</strong></td>
+            2
+          )}</strong></td>
                 </tr>`;
         });
 
@@ -795,14 +790,14 @@ jQuery(document).ready(function () {
                   <td><strong>Total</strong></td>
                   <td></td>
                   <td class="text-right"><strong>${totalQty.toFixed(
-                    2
-                  )}</strong></td>
+          2
+        )}</strong></td>
                   <td></td>
                   <td></td>
                   <td></td>
                   <td class="text-right"><strong>${totalValue.toFixed(
-                    2
-                  )}</strong></td>
+          2
+        )}</strong></td>
                 </tr>
               </tbody>
             </table>
@@ -1023,36 +1018,31 @@ jQuery(document).ready(function () {
                   <td><strong>${item.code || "-"}</strong></td>
                   <td>${item.name || "-"}</td>
                   <td>${item.category || "-"}</td>
-                  <td class="text-right">${
-                    item.list_price
-                      ? parseFloat(item.list_price).toFixed(2)
-                      : "0.00"
-                  }</td>
-                  <td class="text-right">${
-                    item.invoice_price
-                      ? parseFloat(item.invoice_price).toFixed(2)
-                      : "0.00"
-                  }</td>
-                  <td class="text-right">${
-                    item.quantity
-                      ? parseFloat(item.quantity).toFixed(2)
-                      : "0.00"
-                  }</td>
+                  <td class="text-right">${item.list_price
+          ? parseFloat(item.list_price).toFixed(2)
+          : "0.00"
+        }</td>
+                  <td class="text-right">${item.invoice_price
+          ? parseFloat(item.invoice_price).toFixed(2)
+          : "0.00"
+        }</td>
+                  <td class="text-right">${item.quantity
+          ? parseFloat(item.quantity).toFixed(2)
+          : "0.00"
+        }</td>
                   <td class="text-center"><span style="padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; 
-                      background-color: ${
-                        item.stock_status === "Out of Stock"
-                          ? "#fee2e2"
-                          : item.stock_status === "Re-order"
-                          ? "#fef3c7"
-                          : "#dcfce7"
-                      }; 
-                      color: ${
-                        item.stock_status === "Out of Stock"
-                          ? "#991b1b"
-                          : item.stock_status === "Re-order"
-                          ? "#92400e"
-                          : "#166534"
-                      };">
+                      background-color: ${item.stock_status === "Out of Stock"
+          ? "#fee2e2"
+          : item.stock_status === "Re-order"
+            ? "#fef3c7"
+            : "#dcfce7"
+        }; 
+                      color: ${item.stock_status === "Out of Stock"
+          ? "#991b1b"
+          : item.stock_status === "Re-order"
+            ? "#92400e"
+            : "#166534"
+        };">
                       ${item.stock_status || "-"}
                   </span></td>
               </tr>`;
@@ -1088,17 +1078,17 @@ jQuery(document).ready(function () {
                                   <td class="text-right">${cost.toFixed(2)}</td>
                                   <td class="text-right">${qty.toFixed(2)}</td>
                                   <td class="text-right">${(cost * qty).toFixed(
-                                    2
-                                  )}</td>
+            2
+          )}</td>
                                   <td class="text-right">${listPrice.toFixed(
-                                    2
-                                  )}</td>
+            2
+          )}</td>
                                   <td class="text-right">${invoicePrice.toFixed(
-                                    2
-                                  )}</td>
+            2
+          )}</td>
                                   <td class="text-right"><strong>${(
-                                    invoicePrice * qty
-                                  ).toFixed(2)}</strong></td>
+              invoicePrice * qty
+            ).toFixed(2)}</strong></td>
                               </tr>`;
         });
 
@@ -1118,14 +1108,14 @@ jQuery(document).ready(function () {
                                   <td><strong>Total</strong></td>
                                   <td></td>
                                   <td class="text-right"><strong>${totalQty.toFixed(
-                                    2
-                                  )}</strong></td>
+          2
+        )}</strong></td>
                                   <td></td>
                                   <td></td>
                                   <td></td>
                                   <td class="text-right"><strong>${totalValue.toFixed(
-                                    2
-                                  )}</strong></td>
+          2
+        )}</strong></td>
                               </tr>
                           </tbody>
                       </table>
@@ -1143,19 +1133,18 @@ jQuery(document).ready(function () {
           <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
               <div style="flex: 1; min-width: 200px; margin: 5px 0;">
                   <div style="font-size: 13px; color: #7f8c8d;">Total Items</div>
-                  <div style="font-size: 24px; font-weight: 600; color: #2c3e50;">${
-                    data.length
-                  }</div>
+                  <div style="font-size: 24px; font-weight: 600; color: #2c3e50;">${data.length
+      }</div>
               </div>
               <div style="flex: 1; min-width: 200px; margin: 5px 0;">
                   <div style="font-size: 13px; color: #7f8c8d;">Total Quantity</div>
                   <div style="font-size: 24px; font-weight: 600; color: #2c3e50;">
                       ${data
-                        .reduce(
-                          (sum, item) => sum + parseFloat(item.quantity || 0),
-                          0
-                        )
-                        .toFixed(2)}
+        .reduce(
+          (sum, item) => sum + parseFloat(item.quantity || 0),
+          0
+        )
+        .toFixed(2)}
                   </div>
               </div>
               <div style="flex: 1; min-width: 200px; margin: 5px 0;">
@@ -1208,8 +1197,8 @@ jQuery(document).ready(function () {
           type === "error"
             ? "Error"
             : type === "warning"
-            ? "Warning"
-            : "Success",
+              ? "Warning"
+              : "Success",
         text: message,
         type: type,
         timer: 3000,
