@@ -94,6 +94,9 @@ include './auth.php';
                                             <span id="cancelled-badge" class="badge bg-danger" style="font-size: 1.2rem; display: none; padding: 0.75rem 1.2rem;">
                                                 <i class="uil uil-ban me-2"></i> This Invoice Already Cancelled
                                             </span>
+                                            <span id="cancel-remark-container" class="ms-3 text-danger font-size-14" style="display: none; border-left: 2px solid #f46a6a; padding-left: 10px;">
+                                                <strong>Cancellation Reason:</strong> <span id="cancel-remark-text"></span>
+                                            </span>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i>
