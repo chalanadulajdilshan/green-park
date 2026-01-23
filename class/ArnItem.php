@@ -20,6 +20,7 @@ class ArnItem
     public $list_price;
     public $invoice_price;
     public $margin_percent;
+    public $year;
     public $created_at;
     public $updated_at;
     public $is_cancelled;
@@ -47,6 +48,7 @@ class ArnItem
                 $this->unit_total = $row['unit_total'];
                 $this->list_price = $row['list_price'];
                 $this->invoice_price = $row['invoice_price'];
+                $this->year = $row['year'] ?? null;
                 $this->created_at = $row['created_at'];
                 $this->updated_at = $row['updated_at'];
                 $this->is_cancelled = $row['is_cancelled'];
@@ -60,11 +62,11 @@ class ArnItem
         $query = "INSERT INTO `arn_items` (
             `arn_id`, `item_code`, `order_qty`, `received_qty`,
             `discount_1`, `discount_2`, `discount_3`, `discount_4`, `discount_5`, `discount_6`, `discount_7`, `discount_8`, `final_cost`, `unit_total`,
-            `list_price`,`invoice_price`,   `created_at`
+            `list_price`,`invoice_price`, `year`, `created_at`
         ) VALUES (
             '{$this->arn_id}', '{$this->item_code}', '{$this->order_qty}', '{$this->received_qty}',
             '{$this->discount_1}', '{$this->discount_2}', '{$this->discount_3}', '{$this->discount_4}', '{$this->discount_5}', '{$this->discount_6}', '{$this->discount_7}', '{$this->discount_8}', '{$this->final_cost}', '{$this->unit_total}',
-            '{$this->list_price}', '{$this->invoice_price}',   NOW()
+            '{$this->list_price}', '{$this->invoice_price}', '{$this->year}', NOW()
         )";
 
 
@@ -115,8 +117,9 @@ class ArnItem
             `list_price` = '{$this->list_price}',
             `invoice_price` = '{$this->invoice_price}', 
             `margin_percent` = '{$this->margin_percent}',
+            `year` = '{$this->year}',
             `updated_at` = NOW()
-        WHERE `id` = '{$this->id}'";
+        WHERE `id` = '{$this->id}'";;
 
         return $db->readQuery($query);
     }

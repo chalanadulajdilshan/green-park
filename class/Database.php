@@ -17,7 +17,7 @@ class Database
 
             // Local DB
             $this->host = 'localhost';
-            $this->name = '360-erp';
+            $this->name = 'green-park';
             $this->user = 'root';
             $this->password = '';
 

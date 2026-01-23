@@ -390,6 +390,7 @@ class ItemMaster
             $key = 1;
             foreach ($items as $row) {
                 $CATEGORY = new CategoryMaster($row['category']);
+                $LOCATION = $row['location_id'] ? new LocationMaster($row['location_id']) : null;
                 $BRAND = new Brand($row['brand']);
 
                 $deptStocks = $deptStockMap[$row['id']] ?? [];
@@ -416,6 +417,8 @@ class ItemMaster
                         "brand" => $BRAND->name,
                         "category_id" => $row['category'],
                         "category" => $CATEGORY->name,
+                        "location_id" => $row['location_id'],
+                        "location" => $LOCATION ? $LOCATION->name : '-',
                         "list_price" => $row['list_price'],
                         "invoice_price" => $row['invoice_price'],
                         "discount" => $row['discount'],
@@ -493,6 +496,7 @@ class ItemMaster
         while ($row = mysqli_fetch_assoc($dataQuery)) {
             $CATEGORY = new CategoryMaster($row['category']);
             $BRAND = new Brand($row['brand']);
+            $LOCATION = $row['location_id'] ? new LocationMaster($row['location_id']) : null;
 
             // Get department stock information (aggregate by department)
             $departmentStocks = [];
@@ -530,6 +534,8 @@ class ItemMaster
                 "brand" => $BRAND->name,
                 "category_id" => $row['category'],
                 "category" => $CATEGORY->name,
+                "location_id" => $row['location_id'],
+                "location" => $LOCATION ? $LOCATION->name : '-',
                 "list_price" => $row['list_price'],
                 "invoice_price" => $row['invoice_price'],
                 "discount" => $row['discount'],
