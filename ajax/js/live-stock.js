@@ -35,6 +35,7 @@ jQuery(document).ready(function () {
         d.stock_only = true; // Only show items with stock tracking enabled
         const depVal = $("#filter_department_id").val();
         d.department_id = depVal; // Get selected department ("all" becomes 0 on server)
+        d.location_id = $("#filter_location_id").val();
         d.expand_departments = depVal === "all"; // Expand into per-department rows when All is selected
       },
       beforeSend: function () {
@@ -264,10 +265,13 @@ jQuery(document).ready(function () {
   $("#stockTable tbody").css("cursor", "pointer");
 
   // Function to load summary totals
-  function loadSummaryTotals(departmentId = "all") {
+  function loadSummaryTotals(departmentId = "all", locationId = 0) {
     const data = { action: "get_totals" };
     if (departmentId !== "all" && departmentId !== "") {
       data.department_id = departmentId;
+    }
+    if (locationId > 0) {
+      data.location_id = locationId;
     }
     $.ajax({
       url: "ajax/php/item-master.php",
@@ -449,7 +453,16 @@ jQuery(document).ready(function () {
   // Department filter change handler
   $("#filter_department_id").on("change", function () {
     const depId = $(this).val();
-    loadSummaryTotals(depId);
+    const locId = $("#filter_location_id").val();
+    loadSummaryTotals(depId, locId);
+    table.ajax.reload();
+  });
+
+  // Location filter change handler
+  $("#filter_location_id").on("change", function () {
+    const depId = $("#filter_department_id").val();
+    const locId = $(this).val();
+    loadSummaryTotals(depId, locId);
     table.ajax.reload();
   });
 
@@ -541,6 +554,7 @@ jQuery(document).ready(function () {
 
     // Get current filter values
     const departmentId = $("#filter_department_id").val();
+    const locationId = $("#filter_location_id").val();
 
     // Make AJAX request for export data
     $.ajax({
@@ -550,6 +564,7 @@ jQuery(document).ready(function () {
       data: {
         action: "export_stock",
         department_id: departmentId,
+        location_id: locationId,
         status: 1,
         stock_only: 1,
       },

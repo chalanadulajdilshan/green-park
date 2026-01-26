@@ -32,7 +32,7 @@
     $(document).ready(function () {
         // Initialize Select2
         $('.select2').select2({
-            placeholder: 'Select a vehicle',
+            placeholder: 'Select an option',
             allowClear: true
         });
 

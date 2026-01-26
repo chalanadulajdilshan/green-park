@@ -660,7 +660,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'import_excel') {
 
 // Fetch single item by id (for reliable prefill)
 if (isset($_POST['action']) && $_POST['action'] === 'get_by_id') {
-    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
     $response = ['status' => 'error', 'message' => 'Item not found'];
     try {
         if ($id <= 0) {
@@ -671,23 +671,23 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_by_id') {
         $res = $db->readQuery($sql);
         if ($res && ($row = mysqli_fetch_assoc($res))) {
             $item = [
-                'id' => (int)$row['id'],
+                'id' => (int) $row['id'],
                 'code' => $row['code'],
                 'name' => $row['name'],
-                'brand_id' => (int)$row['brand'],
-                'category_id' => (int)$row['category'],
-                'group' => (int)$row['group'],
+                'brand_id' => (int) $row['brand'],
+                'category_id' => (int) $row['category'],
+                'group' => (int) $row['group'],
                 'size' => $row['size'],
                 'pattern' => $row['pattern'],
-                'list_price' => (float)$row['list_price'],
-                'invoice_price' => (float)$row['invoice_price'],
+                'list_price' => (float) $row['list_price'],
+                'invoice_price' => (float) $row['invoice_price'],
                 're_order_level' => $row['re_order_level'],
                 're_order_qty' => $row['re_order_qty'],
                 'stock_type' => $row['stock_type'],
                 'discount' => $row['discount'],
                 'location_id' => $row['location_id'],
                 'note' => $row['note'],
-                'status' => (int)$row['is_active']
+                'status' => (int) $row['is_active']
             ];
             echo json_encode(['status' => 'success', 'item' => $item]);
             exit;
@@ -713,23 +713,23 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_by_code') {
         $res = $db->readQuery($sql);
         if ($res && ($row = mysqli_fetch_assoc($res))) {
             $item = [
-                'id' => (int)$row['id'],
+                'id' => (int) $row['id'],
                 'code' => $row['code'],
                 'name' => $row['name'],
-                'brand_id' => (int)$row['brand'],
-                'category_id' => (int)$row['category'],
-                'group' => (int)$row['group'],
+                'brand_id' => (int) $row['brand'],
+                'category_id' => (int) $row['category'],
+                'group' => (int) $row['group'],
                 'size' => $row['size'],
                 'pattern' => $row['pattern'],
-                'list_price' => (float)$row['list_price'],
-                'invoice_price' => (float)$row['invoice_price'],
+                'list_price' => (float) $row['list_price'],
+                'invoice_price' => (float) $row['invoice_price'],
                 're_order_level' => $row['re_order_level'],
                 're_order_qty' => $row['re_order_qty'],
                 'stock_type' => $row['stock_type'],
                 'discount' => $row['discount'],
                 'location_id' => $row['location_id'],
                 'note' => $row['note'],
-                'status' => (int)$row['is_active']
+                'status' => (int) $row['is_active']
             ];
             echo json_encode(['status' => 'success', 'item' => $item]);
             exit;
@@ -929,11 +929,15 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_for_datatable') {
 
     // If department_id is provided, ensure it's an integer
     if (isset($_POST['department_id']) && !empty($_POST['department_id'])) {
-        $_POST['department_id'] = (int)$_POST['department_id'];
+        $_POST['department_id'] = (int) $_POST['department_id'];
     } else {
         // If no department is selected, you might want to handle this case
         // For now, we'll unset it to show all items
         unset($_POST['department_id']);
+    }
+
+    if (isset($_POST['location_id']) && !empty($_POST['location_id'])) {
+        $_POST['location_id'] = (int) $_POST['location_id'];
     }
 
     $result = $itemMaster->fetchForDataTable($_POST);
@@ -943,7 +947,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_for_datatable') {
 
 if (isset($_POST['action']) && $_POST['action'] === 'get_items_with_stock') {
     $itemMaster = new ItemMaster();
-    $items = $itemMaster::getItemsWithStock();
+    $locationId = isset($_POST['location_id']) ? (int) $_POST['location_id'] : 0;
+    $items = $itemMaster::getItemsWithStock($locationId);
     echo json_encode(['data' => $items]);
     exit();
 }
@@ -951,7 +956,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_items_with_stock') {
 // Handle stock adjustment item filtering
 if (isset($_POST['action']) && $_POST['action'] === 'fetch_for_stock_adjustment') {
     $response = [
-        'draw' => isset($_POST['draw']) ? (int)$_POST['draw'] : 1,
+        'draw' => isset($_POST['draw']) ? (int) $_POST['draw'] : 1,
         'recordsTotal' => 0,
         'recordsFiltered' => 0,
         'data' => [],
@@ -963,15 +968,16 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_for_stock_adjustment'
             throw new Exception('Department ID is required');
         }
 
-        $department_id = (int)$_POST['department_id'];
+        $department_id = (int) $_POST['department_id'];
         $search = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
-        $show_zero_qty = isset($_POST['show_zero_qty']) ? (bool)$_POST['show_zero_qty'] : false;
+        $show_zero_qty = isset($_POST['show_zero_qty']) ? (bool) $_POST['show_zero_qty'] : false;
 
         // Get items with department stock
         $items = ItemMaster::getItemsByDepartmentAndStock(
             $department_id,
             $show_zero_qty ? -1 : 1, // 1 means filter out zero quantity items, -1 means show all
-            $search
+            $search,
+            isset($_POST['location_id']) ? (int) $_POST['location_id'] : 0
         );
 
         // Ensure $items is an array
@@ -991,7 +997,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_for_stock_adjustment'
                 'category' => $item['category_name'] ?? '',
                 'list_price' => number_format($item['list_price'], 2),
                 'invoice_price' => number_format($item['invoice_price'], 2),
-                'available_qty' => (int)($item['available_qty'] ?? 0),
+                'available_qty' => (int) ($item['available_qty'] ?? 0),
                 'discount' => isset($item['discount']) ? $item['discount'] . '%' : '0%',
                 'status_label' => ($item['is_active'] ?? 0) == 1 ?
                     '<span class="badge bg-success">Active</span>' :
@@ -999,7 +1005,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_for_stock_adjustment'
                 'department_stock' => [
                     [
                         'department_id' => $department_id,
-                        'quantity' => (int)($item['available_qty'] ?? 0)
+                        'quantity' => (int) ($item['available_qty'] ?? 0)
                     ]
                 ]
             ];
@@ -1027,15 +1033,32 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_totals') {
             SUM(cost * qty) as total_cost, 
             SUM(invoice_price * qty) as total_invoice 
             FROM stock_item_tmp";
-        $departmentId = isset($_POST['department_id']) ? (int)$_POST['department_id'] : 0;
+        $departmentId = isset($_POST['department_id']) ? (int) $_POST['department_id'] : 0;
         if ($departmentId > 0) {
             $sql .= " WHERE department_id = $departmentId";
         }
+
+        $locationId = isset($_POST['location_id']) ? (int) $_POST['location_id'] : 0;
+        if ($locationId > 0) {
+            // Join with item_master to filter by location
+            // We need to modify query to handle join
+            $sql = "SELECT 
+            SUM(sit.cost * sit.qty) as total_cost, 
+            SUM(sit.invoice_price * sit.qty) as total_invoice 
+            FROM stock_item_tmp sit
+            INNER JOIN item_master im ON sit.item_id = im.id
+            WHERE im.location_id = $locationId";
+
+            if ($departmentId > 0) {
+                $sql .= " AND sit.department_id = $departmentId";
+            }
+        }
+
         $res = $db->readQuery($sql);
         $totals = ['total_cost' => 0, 'total_invoice' => 0, 'profit_percentage' => 0];
         if ($res && ($row = mysqli_fetch_assoc($res))) {
-            $totals['total_cost'] = (float)$row['total_cost'];
-            $totals['total_invoice'] = (float)$row['total_invoice'];
+            $totals['total_cost'] = (float) $row['total_cost'];
+            $totals['total_invoice'] = (float) $row['total_invoice'];
             if ($totals['total_cost'] > 0) {
                 $totals['profit_percentage'] = (($totals['total_invoice'] - $totals['total_cost']) / $totals['total_cost']) * 100;
             }
@@ -1051,8 +1074,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_totals') {
 // Fetch ARN-wise stock lots for a given item id (for Live Stock row details)
 if (isset($_POST['action']) && $_POST['action'] === 'get_stock_tmp_by_item') {
     try {
-        $itemId = isset($_POST['item_id']) ? (int)$_POST['item_id'] : 0;
-        $departmentFilterId = isset($_POST['department_id']) ? (int)$_POST['department_id'] : 0;
+        $itemId = isset($_POST['item_id']) ? (int) $_POST['item_id'] : 0;
+        $departmentFilterId = isset($_POST['department_id']) ? (int) $_POST['department_id'] : 0;
         if ($itemId <= 0) {
             throw new Exception('Invalid item_id');
         }
@@ -1062,14 +1085,27 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_stock_tmp_by_item') {
 
         // Skip lots with zero or negative quantity
         $lots = array_values(array_filter($lots, function ($l) {
-            return isset($l['qty']) && (float)$l['qty'] > 0;
+            return isset($l['qty']) && (float) $l['qty'] > 0;
         }));
 
         // If a department is specified, filter to that department only
         if ($departmentFilterId > 0) {
             $lots = array_values(array_filter($lots, function ($l) use ($departmentFilterId) {
-                return isset($l['department_id']) && (int)$l['department_id'] === $departmentFilterId;
+                return isset($l['department_id']) && (int) $l['department_id'] === $departmentFilterId;
             }));
+        }
+
+        // Filter by Location if provided
+        $locationFilterId = isset($_POST['location_id']) ? (int) $_POST['location_id'] : 0;
+        if ($locationFilterId > 0) {
+            // We need to fetch item location to filter? Actually we only have item_id here.
+            // Wait, get_stock_tmp_by_item is called for a specific Item.
+            // If we are filtering by location in the main table, the items visible ARE already filtered by location.
+            // So the item passed here (item_id) should belong to the filtered location (unless data is stale).
+            // However, strictly speaking, stock_item_tmp doesn't have location_id. item_master does.
+            // But since we are looking at a specific item ($itemId), its location is fixed in item_master.
+            // So we don't need to filter lots by location, because all lots belong to the item, which belongs to one location.
+            // So NO CHANGES needed here for location logic, assuming 1 item = 1 location.
         }
 
         // Decorate with ARN number and department name
@@ -1077,14 +1113,14 @@ if (isset($_POST['action']) && $_POST['action'] === 'get_stock_tmp_by_item') {
         foreach ($lots as $lot) {
             $arnNo = null;
             if (!empty($lot['arn_id'])) {
-                $ARN = new ArnMaster((int)$lot['arn_id']);
+                $ARN = new ArnMaster((int) $lot['arn_id']);
                 if ($ARN && isset($ARN->arn_no)) {
                     $arnNo = $ARN->arn_no;
                 }
             }
             $deptName = null;
             if (!empty($lot['department_id'])) {
-                $DEPT = new DepartmentMaster((int)$lot['department_id']);
+                $DEPT = new DepartmentMaster((int) $lot['department_id']);
                 if ($DEPT && isset($DEPT->name)) {
                     $deptName = $DEPT->name;
                 }
@@ -1106,18 +1142,19 @@ if (isset($_POST['action']) && $_POST['action'] === 'export_stock') {
     try {
         // Get filter parameters
         $department_id = isset($_POST['department_id']) ? $_POST['department_id'] : 'all';
-        $status = isset($_POST['status']) ? (int)$_POST['status'] : 1;
-        $stock_only = isset($_POST['stock_only']) ? (int)$_POST['stock_only'] : 1;
+        $location_id = isset($_POST['location_id']) ? (int) $_POST['location_id'] : 0;
+        $status = isset($_POST['status']) ? (int) $_POST['status'] : 1;
+        $stock_only = isset($_POST['stock_only']) ? (int) $_POST['stock_only'] : 1;
 
         $items = [];
 
         if ($department_id !== 'all' && $department_id !== '' && $department_id !== null) {
             // Use ItemMaster class method for specific department
-            $dept_id = (int)$department_id;
-            $items = ItemMaster::getItemsByDepartmentAndStock($dept_id, 1, '');
+            $dept_id = (int) $department_id;
+            $items = ItemMaster::getItemsByDepartmentAndStock($dept_id, 1, '', $location_id);
         } else {
             // Use ItemMaster class method for all items with stock
-            $all_items = ItemMaster::getItemsWithStock();
+            $all_items = ItemMaster::getItemsWithStock($location_id);
 
             // Filter for active items only
             foreach ($all_items as $item) {
@@ -1136,21 +1173,21 @@ if (isset($_POST['action']) && $_POST['action'] === 'export_stock') {
                 'code' => $item['code'] ?: '',
                 'name' => $item['name'] ?: '',
                 'category' => isset($category->name) ? $category->name : '',
-                'list_price' => (float)($item['list_price'] ?: 0),
-                'discount' => (float)($item['discount'] ?: 0),
-                'invoice_price' => (float)($item['invoice_price'] ?: 0),
-                'quantity' => (float)($item['total_qty'] ?: 0),
+                'list_price' => (float) ($item['list_price'] ?: 0),
+                'discount' => (float) ($item['discount'] ?: 0),
+                'invoice_price' => (float) ($item['invoice_price'] ?: 0),
+                'quantity' => (float) ($item['total_qty'] ?: 0),
                 'stock_status' => 'In Stock',
                 'arn_lots' => []
             ];
 
             // Calculate dealer price if not using invoice_price
             if ($export_item['invoice_price'] <= 0 && $export_item['list_price'] && $export_item['discount']) {
-                $export_item['invoice_price'] = (float)$export_item['list_price'] * (1 - (float)$export_item['discount'] / 100);
+                $export_item['invoice_price'] = (float) $export_item['list_price'] * (1 - (float) $export_item['discount'] / 100);
             }
 
             // Determine stock status
-            $reorder_level = (float)($item['re_order_level'] ?: 0);
+            $reorder_level = (float) ($item['re_order_level'] ?: 0);
             if ($export_item['quantity'] <= 0) {
                 $export_item['stock_status'] = 'Out of Stock';
             } elseif ($export_item['quantity'] <= $reorder_level) {
@@ -1159,11 +1196,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'export_stock') {
 
             // Get ARN lots for this item using StockItemTmp class
             $stockTmp = new StockItemTmp();
-            $item_id = (int)$item['id'];
+            $item_id = (int) $item['id'];
 
             if ($department_id !== 'all' && $department_id !== '' && $department_id !== null) {
                 // Get ARN lots for specific department
-                $lots = $stockTmp->getByItemIdAndDepartment($item_id, (int)$department_id);
+                $lots = $stockTmp->getByItemIdAndDepartment($item_id, (int) $department_id);
             } else {
                 // Get all ARN lots for the item
                 $lots = $stockTmp->getByItemId($item_id);
@@ -1171,7 +1208,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'export_stock') {
 
             foreach ($lots as $lot) {
                 // Skip zero or negative quantity lots
-                if ((float)$lot['qty'] <= 0) {
+                if ((float) $lot['qty'] <= 0) {
                     continue;
                 }
 
@@ -1180,10 +1217,10 @@ if (isset($_POST['action']) && $_POST['action'] === 'export_stock') {
 
                 $export_item['arn_lots'][] = [
                     'arn_no' => $arn->arn_no ?? '',
-                    'cost' => (float)$lot['cost'],
-                    'qty' => (float)$lot['qty'],
-                    'list_price' => (float)$lot['list_price'],
-                    'invoice_price' => (float)$lot['invoice_price']
+                    'cost' => (float) $lot['cost'],
+                    'qty' => (float) $lot['qty'],
+                    'list_price' => (float) $lot['list_price'],
+                    'invoice_price' => (float) $lot['invoice_price']
                 ];
             }
 
