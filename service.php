@@ -112,7 +112,7 @@ $service_id = 'S/0' . ($lastId + 1);
 
                                             <!-- Price -->
                                             <div class="col-md-2">
-                                                <label class="form-label" for="service_price">Price</label>
+                                                <label class="form-label" for="service_price">Service Charge</label>
                                                 <div class="input-group mb-3">
                                                     <input id="service_price" name="service_price" type="number" step="0.01"
                                                         class="form-control" placeholder="0.00">

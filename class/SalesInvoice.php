@@ -31,6 +31,9 @@ class SalesInvoice
     public $due_date;
     public $is_return;
     public $is_vat;
+    public $wheel_balancer_id;
+    public $wheel_balancer_commission;
+    public $vehicle_meter;
 
     // Constructor to initialize the SalesInvoice object with an ID
     public function __construct($id = null)
@@ -70,6 +73,9 @@ class SalesInvoice
                 $this->due_date = $result['due_date'];
                 $this->is_return = $result['is_return'];
                 $this->is_vat = $result['is_vat'] ?? 0;
+                $this->wheel_balancer_id = $result['wheel_balancer_id'];
+                $this->wheel_balancer_commission = $result['wheel_balancer_commission'];
+                $this->vehicle_meter = $result['vehicle_meter'];
             }
         }
     }
@@ -80,11 +86,11 @@ class SalesInvoice
         $query = "INSERT INTO `sales_invoice` (
             `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_address`, `customer_vehicle_no`, `recommended_person`, `department_id`, 
             `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, 
-            `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`, `is_vat`
+            `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`, `is_vat`, `wheel_balancer_id`, `wheel_balancer_commission`, `vehicle_meter`
         ) VALUES (
             '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_address}', '{$this->customer_vehicle_no}', '{$this->recommended_person}', '{$this->department_id}', 
             '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', 
-            '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}', '{$this->is_vat}'
+            '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}', '{$this->is_vat}', '{$this->wheel_balancer_id}', '{$this->wheel_balancer_commission}', '{$this->vehicle_meter}'
         )";
 
 
@@ -111,7 +117,9 @@ class SalesInvoice
             `customer_name` = '{$this->customer_name}', 
             `customer_mobile` = '{$this->customer_mobile}', 
             `customer_address` = '{$this->customer_address}', 
+            `customer_address` = '{$this->customer_address}', 
             `customer_vehicle_no` = '{$this->customer_vehicle_no}', 
+            `vehicle_meter` = '{$this->vehicle_meter}', 
             `recommended_person` = '{$this->recommended_person}', 
             `department_id` = '{$this->department_id}', 
             `sale_type` = '{$this->sale_type}', 
@@ -143,7 +151,9 @@ class SalesInvoice
             return ['success' => false, 'reason' => 'returned', 'message' => 'Cannot cancel invoice that has been returned. Please process returns separately.'];
         }
         // Use prepared statement to prevent SQL injection
-        $query = "UPDATE `sales_invoice` SET `is_cancel` = 1, `remark` = '{$this->remark}' WHERE `id` = $this->id";
+        $db = Database::getInstance();
+        $remark = $db->escapeString($this->remark);
+        $query = "UPDATE `sales_invoice` SET `is_cancel` = 1, `remark` = '$remark' WHERE `id` = $this->id";
 
         $db = Database::getInstance();
         $result = $db->readQuery($query);
@@ -702,6 +712,55 @@ class SalesInvoice
 
         while ($row = mysqli_fetch_array($result)) {
             array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+    // Get invoices by wheel balancer and date range
+    public function getInvoicesByWheelBalancer($wheelBalancerId, $fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $wheelBalancerId = (int)$wheelBalancerId;
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT si.id, si.invoice_no, si.invoice_date, si.customer_name, si.grand_total, si.wheel_balancer_commission 
+                  FROM `sales_invoice` si 
+                  WHERE si.wheel_balancer_id = $wheelBalancerId 
+                  AND si.invoice_date BETWEEN '$fromDate' AND '$toDate' 
+                  AND si.is_cancel = 0 
+                  ORDER BY si.invoice_date DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+
+    public function getWheelBalancerTotals($fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT wheel_balancer_id, SUM(grand_total) as total_amount, SUM(wheel_balancer_commission) as total_commission 
+                  FROM `sales_invoice` 
+                  WHERE is_cancel = 0 
+                  AND invoice_date BETWEEN '$fromDate' AND '$toDate' 
+                  GROUP BY wheel_balancer_id";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            $array_res[$row['wheel_balancer_id']] = [
+                'total_amount' => $row['total_amount'],
+                'total_commission' => $row['total_commission']
+            ];
         }
 
         return $array_res;

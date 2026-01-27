@@ -106,6 +106,9 @@ include './auth.php';
 
                                 <div class="p-4">
                                     <form id="form-data">
+                                        <div id="cancellation-remark-container" class="alert alert-danger" style="display: none;">
+                                            <strong>Cancelled!</strong> Reason: <span id="cancellation-remark-text"></span>
+                                        </div>
                                         <div class="row">
                                             <div class="col-md-2">
                                                 <div class=" ">
@@ -137,7 +140,7 @@ include './auth.php';
                                             <input type="hidden" id="invoice_id" name="invoice_id" />
 
                                             <!-- company ID -->
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label for="bankId" class="form-label">Company</label>
                                                 <div class="input-group mb-3">
                                                     <select id="company_id" name="company_id" class="form-select">
@@ -154,7 +157,7 @@ include './auth.php';
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label for="department" class="form-label">Department</label>
                                                 <div class="input-group mb-3">
                                                     <select id="department_id" name="department_id" class="form-select">
@@ -230,6 +233,84 @@ include './auth.php';
                                                         class="form-control" placeholder="Enter Mobile Number">
                                                 </div>
                                             </div>
+                                            
+
+                                            <div class="col-md-2">
+                                                <label for="customerVehicleNo" class="form-label">Vehicle No</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="customer_vehicle_no" name="customer_vehicle_no" type="text"
+                                                        class="form-control" placeholder="Enter Vehicle No">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label for="vehicle_meter" class="form-label">Vehicle Meter</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="vehicle_meter" name="vehicle_meter" type="text"
+                                                        class="form-control" placeholder="Enter Meter Reading">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label for="recommendedPerson" class="form-label">Recommended Person</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="recommended_person" name="recommended_person" type="text"
+                                                        class="form-control" placeholder="Enter Recommended Person">
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="col-md-1">
+                                                <label for="customerCode" class="form-label">Dag Ref No</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="ref_no" name="ref_no" type="text" class="form-control"
+                                                        placeholder="Select Dag Ref No" readonly>
+                                                    <button class="btn btn-info" type="button" data-bs-toggle="modal"
+                                                        data-bs-target="#dagModel">
+                                                        <i class="uil uil-search me-1"></i>
+                                                    </button>
+                                                </div>
+
+                                                <input type="hidden" id="dag_id" name="dag_id" />
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label for="quotation_ref_no" class="form-label">Select Quotation</label>
+                                                <div class="input-group mb-3">
+                                                    <input id="quotation_ref_no" name="quotation_ref_no" type="text" class="form-control"
+                                                        placeholder="Select Quotation" readonly>
+                                                    <button class="btn btn-info" type="button" data-bs-toggle="modal"
+                                                        data-bs-target="#quotationModel">
+                                                        <i class="uil uil-search me-1"></i>
+                                                    </button>
+                                                </div>
+
+                                                <input type="hidden" id="quotation_id" name="quotation_id" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label for="wheel_balancer" class="form-label text-danger">Wheel Balancer <span class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <select id="wheel_balancer_id" name="wheel_balancer_id" class="form-select">
+                                                        <option value="">-- Select Balancer --</option>
+                                                        <?php
+                                                        $WHEEL_BALANCER = new WheelBalancer(NULL);
+                                                        foreach ($WHEEL_BALANCER->getActiveWheelBalancers() as $wb) {
+                                                        ?>
+                                                            <option value="<?php echo $wb['id'] ?>">
+                                                                <?php echo $wb['name'] ?>
+                                                            </option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label for="wheel_balancer_commission" class="form-label">Commission</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="number" step="0.01" id="wheel_balancer_commission" name="wheel_balancer_commission" class="form-control" placeholder="0.00" value="0.00">
+                                                </div>
+                                            </div>
+
                                             <div class="col-md-2">
                                                 <label for="isVatInvoice" class="form-label">VAT Invoice</label>
                                                 <div class="input-group mb-3">
@@ -271,52 +352,6 @@ include './auth.php';
 
                                             <input type="hidden" id="vat_percentage" name="vat_percentage" value="<?php echo htmlspecialchars($vat_percentage); ?>" />
 
-
-                                            <div class="col-md-2">
-                                                <label for="customerVehicleNo" class="form-label">Vehicle No</label>
-                                                <div class="input-group mb-3">
-                                                    <input id="customer_vehicle_no" name="customer_vehicle_no" type="text"
-                                                        class="form-control" placeholder="Enter Vehicle No">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-2">
-                                                <label for="recommendedPerson" class="form-label">Recommended Person</label>
-                                                <div class="input-group mb-3">
-                                                    <input id="recommended_person" name="recommended_person" type="text"
-                                                        class="form-control" placeholder="Enter Recommended Person">
-                                                </div>
-                                            </div>
-
-
-
-                                            <div class="col-md-2">
-                                                <label for="customerCode" class="form-label">Dag Ref No</label>
-                                                <div class="input-group mb-3">
-                                                    <input id="ref_no" name="ref_no" type="text" class="form-control"
-                                                        placeholder="Select Dag Ref No" readonly>
-                                                    <button class="btn btn-info" type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#dagModel">
-                                                        <i class="uil uil-search me-1"></i>
-                                                    </button>
-                                                </div>
-
-                                                <input type="hidden" id="dag_id" name="dag_id" />
-                                            </div>
-
-                                            <div class="col-md-2">
-                                                <label for="quotation_ref_no" class="form-label">Select Quotation</label>
-                                                <div class="input-group mb-3">
-                                                    <input id="quotation_ref_no" name="quotation_ref_no" type="text" class="form-control"
-                                                        placeholder="Select Quotation" readonly>
-                                                    <button class="btn btn-info" type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#quotationModel">
-                                                        <i class="uil uil-search me-1"></i>
-                                                    </button>
-                                                </div>
-
-                                                <input type="hidden" id="quotation_id" name="quotation_id" />
-                                            </div>
 
                                             <hr class="my-4">
                                             <div class="row align-items-end" id="addItemTable">

@@ -291,8 +291,11 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->customer_mobile = $_POST['customer_mobile'];
     $SALES_INVOICE->customer_address = ucwords(strtolower(trim($_POST['customer_address'])));
     $SALES_INVOICE->customer_vehicle_no = isset($_POST['customer_vehicle_no']) ? trim($_POST['customer_vehicle_no']) : null;
+    $SALES_INVOICE->vehicle_meter = isset($_POST['vehicle_meter']) ? trim($_POST['vehicle_meter']) : null;
     $SALES_INVOICE->recommended_person = isset($_POST['recommended_person']) ? ucwords(strtolower(trim($_POST['recommended_person']))) : null;
     $SALES_INVOICE->department_id = $_POST['department_id'];
+    $SALES_INVOICE->wheel_balancer_id = $_POST['wheel_balancer_id'];
+    $SALES_INVOICE->wheel_balancer_commission = isset($_POST['wheel_balancer_commission']) ? $_POST['wheel_balancer_commission'] : 0;
     $SALES_INVOICE->sale_type = $_POST['sales_type'];
     $SALES_INVOICE->final_cost = $final_cost;
 
