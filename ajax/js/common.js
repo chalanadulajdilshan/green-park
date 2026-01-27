@@ -631,8 +631,12 @@ jQuery(document).ready(function () {
         ).prop("checked", true);
 
         if (response.is_cancel == 1) {
+          $("#cancellation-remark-container").show();
+          $("#cancellation-remark-text").text(response.remark || "No reason provided");
           $(".cancel-invoice").hide();
         } else {
+          $("#cancellation-remark-container").hide();
+          $("#cancellation-remark-text").text("");
           $(".cancel-invoice").show();
         }
 
@@ -643,6 +647,9 @@ jQuery(document).ready(function () {
         $("#company_id")
           .val(response.company_id || "")
           .trigger("change");
+
+        $("#wheel_balancer_id").val(response.wheel_balancer_id || "");
+        $("#wheel_balancer_commission").val(response.wheel_balancer_commission || "0.00");
 
         // Set customer information
         $("#customer_code").val(response.customer_code || "");

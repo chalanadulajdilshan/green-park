@@ -372,7 +372,7 @@ if ($homeViewMode === 'nav_buttons' || $homeViewMode === 'header') {
                                     <span class="badge rounded-pill bg-danger float-end"><?php echo $nv_dueCount; ?></span>
                                 <?php endif; ?>
                             </a>
-                        </li>
+                        </li> 
                     </ul>
                 </div>
             </nav>

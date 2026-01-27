@@ -88,6 +88,13 @@ $CUSTOMER = new CustomerMaster($SALES_INVOICE->customer_id);
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="p-4">
+                                    <?php if ($SALES_INVOICE->is_cancel == 1) { ?>
+                                        <div class="alert alert-danger" role="alert">
+                                            <i class="mdi mdi-block-helper me-2"></i>
+                                            <strong>This Invoice is Cancelled!</strong>
+                                            <span class="ms-2">Reason: <?php echo $SALES_INVOICE->remark; ?></span>
+                                        </div>
+                                    <?php } ?>
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0 me-3">
                                             <div class="avatar-xs">
@@ -186,6 +193,20 @@ $CUSTOMER = new CustomerMaster($SALES_INVOICE->customer_id);
                                                 <div class="input-group mb-3">
                                                     <input id="customer_mobile" name="customer_mobile" value="<?php echo $CUSTOMER->mobile_number ?>" type="text"
                                                         class="form-control" placeholder="Enter Mobile Number">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label class="form-label">Vehicle No</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="text" class="form-control" value="<?php echo $SALES_INVOICE->customer_vehicle_no ?>" readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label class="form-label">Vehicle Meter</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="text" class="form-control" value="<?php echo $SALES_INVOICE->vehicle_meter ?>" readonly>
                                                 </div>
                                             </div>
 
