@@ -657,6 +657,7 @@ jQuery(document).ready(function () {
         $("#customer_address").val(response.customer_address || "");
         $("#customer_mobile").val(response.customer_mobile || "");
         $("#customer_vehicle_no").val(response.customer_vehicle_no || "");
+        $("#vehicle_meter").val(response.vehicle_meter || "");
 
         // Set VAT information
         $("#customer_vat_no").val(response.vat_no || "");
