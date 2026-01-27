@@ -276,6 +276,7 @@ class ItemMaster
         $status = $request['status'] ?? null;
         $stockOnly = isset($request['stock_only']) ? filter_var($request['stock_only'], FILTER_VALIDATE_BOOLEAN) : false;
         $departmentId = isset($request['department_id']) ? (int) $request['department_id'] : 0;
+        $locationId = isset($request['location_id']) ? (int) $request['location_id'] : 0;
         $expandDepartments = isset($request['expand_departments']) ? filter_var($request['expand_departments'], FILTER_VALIDATE_BOOLEAN) : false;
 
         $where = "WHERE 1=1";
@@ -302,6 +303,11 @@ class ItemMaster
         if (!empty($categoryId)) {
             $categoryId = (int) $categoryId;
             $where .= " AND im.category = {$categoryId}";
+        }
+
+        // Location filter
+        if ($locationId > 0) {
+            $where .= " AND im.location_id = {$locationId}";
         }
 
 
@@ -604,13 +610,19 @@ class ItemMaster
         return $reorderItems;
     }
 
-    public static function getItemsWithStock()
+    public static function getItemsWithStock($location_id = 0)
     {
         $db = Database::getInstance();
+        $condition = "im.is_active = 1";
+
+        if ($location_id > 0) {
+            $condition .= " AND im.location_id = " . (int) $location_id;
+        }
+
         $query = "SELECT im.*, 
                  IFNULL((SELECT SUM(quantity) FROM stock_master WHERE item_id = im.id), 0) as total_qty
                  FROM item_master im
-                 WHERE im.is_active = 1
+                 WHERE $condition
                  HAVING total_qty > 0
                  ORDER BY im.name ASC";
 
@@ -624,7 +636,7 @@ class ItemMaster
         return $items;
     }
 
-    public static function getItemsByDepartmentAndStock($department_id, $min_quantity = 1, $search = '')
+    public static function getItemsByDepartmentAndStock($department_id, $min_quantity = 1, $search = '', $location_id = 0)
     {
         $db = Database::getInstance();
 
@@ -647,6 +659,7 @@ class ItemMaster
               LEFT JOIN category_master c ON im.category = c.id
               LEFT JOIN group_master g ON im.group = g.id
               WHERE im.is_active = 1
+              " . ($location_id > 0 ? " AND im.location_id = " . (int) $location_id : "") . "
               HAVING available_qty > 0";  // Always filter out items with zero quantity
 
         // Add search term if provided

@@ -7,13 +7,17 @@ include 'auth.php';
 $DEPARTMENT_MASTER = new DepartmentMaster();
 $departments = $DEPARTMENT_MASTER->all();
 
+// Fetch locations for the filter
+$LOCATION_MASTER = new LocationMaster();
+$locations = $LOCATION_MASTER->all();
+
 // Resolve Item Master page ID for permission-safe redirects
 $ITEM_MASTER_PAGE_ID = 0;
 try {
     $dbTmp = Database::getInstance();
     $resTmp = $dbTmp->readQuery("SELECT id FROM `pages` WHERE LOWER(`page_url`) LIKE '%item-master%' LIMIT 1");
     if ($resTmp && ($rowTmp = mysqli_fetch_assoc($resTmp))) {
-        $ITEM_MASTER_PAGE_ID = (int)$rowTmp['id'];
+        $ITEM_MASTER_PAGE_ID = (int) $rowTmp['id'];
     }
 } catch (Exception $e) {
     // ignore
@@ -103,11 +107,30 @@ try {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-3">
                                             <div class="form-group mb-0">
-                                                <label for="filter_department_id" class="form-label">Filter by Department</label>
+                                                <label for="filter_location_id" class="form-label">Filter by
+                                                    Location</label>
                                                 <div class="input-group">
-                                                    <select class="form-control select2" id="filter_department_id" name="filter_department_id">
+                                                    <select class="form-control select2" id="filter_location_id"
+                                                        name="filter_location_id">
+                                                        <option value="0" selected>All Locations</option>
+                                                        <?php foreach ($locations as $location): ?>
+                                                            <option value="<?php echo $location['id']; ?>">
+                                                                <?php echo htmlspecialchars($location['name']); ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-0">
+                                                <label for="filter_department_id" class="form-label">Filter by
+                                                    Department</label>
+                                                <div class="input-group">
+                                                    <select class="form-control select2" id="filter_department_id"
+                                                        name="filter_department_id">
                                                         <option value="all" selected>Show All Departments</option>
                                                         <?php foreach ($departments as $department): ?>
                                                             <option value="<?php echo $department['id']; ?>">
@@ -171,7 +194,7 @@ try {
 
     <!-- Expose Item Master Page ID to JS for permission-safe redirect -->
     <script>
-        window.ITEM_MASTER_PAGE_ID = <?php echo (int)$ITEM_MASTER_PAGE_ID; ?>;
+        window.ITEM_MASTER_PAGE_ID = <?php echo (int) $ITEM_MASTER_PAGE_ID; ?>;
     </script>
 
     <!-- Live Stock JS -->
