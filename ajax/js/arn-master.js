@@ -454,15 +454,17 @@ jQuery(document).ready(function () {
             <td><input type="number" name="items[][rec_qty]" class="form-control form-control-sm" value="${recQty}" readonly></td>
             <td><input type="number" name="items[][list_price]" class="form-control form-control-sm" value="${listPrice.toFixed(2)}" readonly></td>
             <td>
-            <input type="number"  class="form-control form-control-sm" value="${dis1}" readonly>
-            <input type="hidden" name="items[][dis6]" class="form-control form-control-sm" value="${dis6}" readonly>
-            <input type="hidden" name="items[][dis7]" class="form-control form-control-sm" value="${dis7}" readonly>
-            <input type="hidden" name="items[][dis8]" class="form-control form-control-sm" value="${dis8}" readonly>
+                <input type="number" class="form-control form-control-sm" value="${dis1}" readonly>
+                <input type="hidden" name="items[][dis6]" value="${dis6}">
+                <input type="hidden" name="items[][dis7]" value="${dis7}">
+                <input type="hidden" name="items[][dis8]" value="${dis8}">
             </td>
             <td><input type="number" name="items[][dis2]" class="form-control form-control-sm" value="${dis2}" readonly></td>
-            <td><input type="number" name="items[][dis3]" class="form-control form-control-sm" value="${dis3}" readonly></td>
-            <input type="hidden" name="items[][dis4]" value="${dis4}">
-            <input type="hidden" name="items[][dis5]" value="${dis5}">
+            <td>
+                <input type="number" name="items[][dis3]" class="form-control form-control-sm" value="${dis3}" readonly>
+                <input type="hidden" name="items[][dis4]" value="${dis4}">
+                <input type="hidden" name="items[][dis5]" value="${dis5}">
+            </td>
             <td><input type="number" name="items[][actual_cost]" class="form-control form-control-sm" value="${actualCost.toFixed(2)}" readonly></td>
             <td><input type="number" name="items[][unit_total]" class="form-control form-control-sm" value="${unitTotal.toFixed(2)}" readonly></td>
             <td><input type="number" name="items[][invoice_price]" class="form-control form-control-sm" value="${InvoicePrice.toFixed(2)}" readonly></td>
@@ -492,6 +494,7 @@ jQuery(document).ready(function () {
 
 
         // Clear input fields
+        $('#item_id').val('');
         $('#itemCode').val('');
         $('#rec_quantity').val('');
         $('#list_price').val('');
@@ -1026,17 +1029,18 @@ jQuery(document).ready(function () {
                     order_qty: parseFloat($(cols[1]).find("input").val()) || 0,
                     rec_qty: parseFloat($(cols[2]).find("input").val()) || 0,
                     list_price: parseFloat($(cols[3]).find("input").val()) || 0,
-                    dis1: parseFloat($(cols[4]).find("input").val()) || 0,
+                    dis1: parseFloat($(cols[4]).find('input:not([type="hidden"])').val()) || 0,
                     dis6: parseFloat($(cols[4]).find('input[name*="dis6"]').val()) || 0,
                     dis7: parseFloat($(cols[4]).find('input[name*="dis7"]').val()) || 0,
                     dis8: parseFloat($(cols[4]).find('input[name*="dis8"]').val()) || 0,
                     dis2: parseFloat($(cols[5]).find("input").val()) || 0,
-                    dis3: parseFloat($(cols[6]).find("input").val()) || 0,
-                    dis4: parseFloat($(cols[7]).find("input").val()) || 0,
-                    dis5: parseFloat($(cols[8]).find("input").val()) || 0,
-                    actual_cost: parseFloat($(cols[9]).find("input").val()) || 0,
-                    unit_total: parseFloat($(cols[10]).find("input").val()) || 0,
-                    invoice_price: parseFloat($(cols[11]).find("input").val()) || 0,
+                    dis3: parseFloat($(cols[6]).find('input[name*="dis3"]').val()) || 0,
+                    dis4: parseFloat($(cols[6]).find('input[name*="dis4"]').val()) || 0,
+                    dis5: parseFloat($(cols[6]).find('input[name*="dis5"]').val()) || 0,
+                    actual_cost: parseFloat($(cols[7]).find("input").val()) || 0,
+                    unit_total: parseFloat($(cols[8]).find("input").val()) || 0,
+                    invoice_price: parseFloat($(cols[9]).find("input").val()) || 0,
+                    year: $(cols[10]).find('input[name*="year"]').val() || null,
                 });
             });
 
@@ -1308,22 +1312,36 @@ jQuery(document).ready(function () {
                     const d7 = parseFloat(item.discount_7) || 0;
                     const d8 = parseFloat(item.discount_8) || 0;
 
-                    const dis1 = d6 + d7 + d8;
+                    const dis1 = d6 + d7 + d8; // Brand Discount total
+                    const listPrice = parseFloat(item.list_price) || 0;
+                    const finalCost = parseFloat(item.final_cost) || 0;
+                    const unitTotal = parseFloat(item.unit_total) || 0;
+                    const invoicePrice = parseFloat(item.invoice_price) || 0;
+                    const itemYear = item.year || '';
 
                     const row = `
                         <tr data-item-id="${item.item_code}">
-                           <td>${item.item_code + ' - ' + item.item_name}  </td>
-                            <td><input type="number" name="items[][order_qty]" class="form-control form-control-sm" value="${item.order_qty}" readonly></td>
-                            <td><input type="number" name="items[][rec_qty]" class="form-control form-control-sm" value="${item.received_qty}" readonly></td>
-                            <td><input type="number" name="items[][dis2]" class="form-control form-control-sm" value="${item.list_price}" readonly></td>
-                            <td><input type="number" name="items[][dis3]" class="form-control form-control-sm" value="${dis1}" readonly></td>
-                            <td><input type="number" name="items[][dis4]" class="form-control form-control-sm" value="${item.discount_2 || 0}" readonly></td>
-                            <td><input type="number" name="items[][dis5]" class="form-control form-control-sm" value="${item.discount_3 || 0}" readonly></td>
-                            <td><input type="number" name="items[][dis6]" class="form-control form-control-sm" value="${item.discount_4 || 0}" readonly></td>
-                            <td><input type="number" name="items[][dis7]" class="form-control form-control-sm" value="${item.discount_5 || 0}" readonly></td>
-                            <td><input type="number" name="items[][actual_cost]" class="form-control form-control-sm" value="${item.final_cost}" readonly></td>
-                            <td><input type="number" name="items[][unit_total]" class="form-control form-control-sm" value="${item.unit_total}" readonly></td>
-                            <td> </td>
+                            <td>${item.item_code + ' - ' + item.item_name}</td>
+                            <td><input type="number" name="items[][order_qty]" class="form-control form-control-sm" value="${item.order_qty || 0}" readonly></td>
+                            <td><input type="number" name="items[][rec_qty]" class="form-control form-control-sm" value="${item.received_qty || 0}" readonly></td>
+                            <td><input type="number" name="items[][list_price]" class="form-control form-control-sm" value="${listPrice.toFixed(2)}" readonly></td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm" value="${dis1.toFixed(2)}" readonly>
+                                <input type="hidden" name="items[][dis6]" value="${d6}">
+                                <input type="hidden" name="items[][dis7]" value="${d7}">
+                                <input type="hidden" name="items[][dis8]" value="${d8}">
+                            </td>
+                            <td><input type="number" name="items[][dis2]" class="form-control form-control-sm" value="${item.discount_2 || 0}" readonly></td>
+                            <td>
+                                <input type="number" name="items[][dis3]" class="form-control form-control-sm" value="${item.discount_3 || 0}" readonly>
+                                <input type="hidden" name="items[][dis4]" value="${item.discount_4 || 0}">
+                                <input type="hidden" name="items[][dis5]" value="${item.discount_5 || 0}">
+                            </td>
+                            <td><input type="number" name="items[][actual_cost]" class="form-control form-control-sm" value="${finalCost.toFixed(2)}" readonly></td>
+                            <td><input type="number" name="items[][unit_total]" class="form-control form-control-sm" value="${unitTotal.toFixed(2)}" readonly></td>
+                            <td><input type="number" name="items[][invoice_price]" class="form-control form-control-sm" value="${invoicePrice.toFixed(2)}" readonly></td>
+                            <td>${itemYear || '-'}<input type="hidden" name="items[][year]" value="${itemYear}"></td>
+                            <td></td>
                         </tr>
                     `;
                     tbody.append(row);
@@ -1451,5 +1469,3 @@ jQuery(document).ready(function () {
 
 
 });
-
-

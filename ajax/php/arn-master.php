@@ -115,20 +115,21 @@ if (isset($data['create'])) {
             $ARN_ITEM = new ArnItem(NULL);
             $ARN_ITEM->arn_id = $arn_id;
             $ARN_ITEM->item_code = $itemId;
-            $ARN_ITEM->order_qty = $item['order_qty'];
+            $ARN_ITEM->order_qty = $item['order_qty'] ?? 0;
             $ARN_ITEM->received_qty = $recQty;
-            $ARN_ITEM->discount_2 = $item['dis2'];
-            $ARN_ITEM->discount_3 = $item['dis3'];
-            $ARN_ITEM->discount_4 = $item['dis4'];
-            $ARN_ITEM->discount_5 = $item['dis5'];
-            $ARN_ITEM->discount_6 = $item['dis6'];
-            $ARN_ITEM->discount_7 = $item['dis7'];
-            $ARN_ITEM->discount_8 = $item['dis8'];
-            $ARN_ITEM->final_cost = $item['actual_cost'];
-            $ARN_ITEM->unit_total = $item['unit_total'];
-            $ARN_ITEM->list_price = $item['list_price'];
-            $ARN_ITEM->invoice_price = $item['invoice_price'];
-            $ARN_ITEM->year = isset($item['year']) ? $item['year'] : null;
+            $ARN_ITEM->discount_1 = $item['dis1'] ?? 0;
+            $ARN_ITEM->discount_2 = $item['dis2'] ?? 0;
+            $ARN_ITEM->discount_3 = $item['dis3'] ?? 0;
+            $ARN_ITEM->discount_4 = $item['dis4'] ?? 0;
+            $ARN_ITEM->discount_5 = $item['dis5'] ?? 0;
+            $ARN_ITEM->discount_6 = $item['dis6'] ?? 0;
+            $ARN_ITEM->discount_7 = $item['dis7'] ?? 0;
+            $ARN_ITEM->discount_8 = $item['dis8'] ?? 0;
+            $ARN_ITEM->final_cost = $item['actual_cost'] ?? 0;
+            $ARN_ITEM->unit_total = $item['unit_total'] ?? 0;
+            $ARN_ITEM->list_price = $item['list_price'] ?? 0;
+            $ARN_ITEM->invoice_price = $item['invoice_price'] ?? 0;
+            $ARN_ITEM->year = isset($item['year']) && $item['year'] !== '' ? $item['year'] : null;
             $ARN_ITEM->created_at = date("Y-m-d H:i:s");
             $ARN_ITEM->create();
 
@@ -338,5 +339,3 @@ if (isset($_POST['filter'])) {
         exit();
     }
 }
-
-
