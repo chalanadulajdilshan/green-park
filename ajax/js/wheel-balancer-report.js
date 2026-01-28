@@ -20,7 +20,7 @@ $(document).ready(function () {
         const toDate = $("#to_date").val();
 
         // Add loading row
-        const loadingRow = `<tr class="expanded-row"><td colspan="5" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
+        const loadingRow = `<tr class="expanded-row"><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
         tr.after(loadingRow);
 
         $.ajax({
@@ -59,7 +59,7 @@ $(document).ready(function () {
 
                     const tableHtml = `
                     <tr class="expanded-row bg-light">
-                        <td colspan="5">
+                        <td colspan="7">
                             <div class="p-3">
                                 <h6 class="mb-3">Invoices for this Wheel Balancer</h6>
                                 <table class="table table-sm table-bordered bg-white">
@@ -85,14 +85,14 @@ $(document).ready(function () {
                     tr.after(tableHtml);
                 } else {
                     tr.after(
-                        `<tr class="expanded-row bg-light"><td colspan="5" class="text-center p-3 text-muted">No invoices found for the selected period.</td></tr>`
+                        `<tr class="expanded-row bg-light"><td colspan="7" class="text-center p-3 text-muted">No invoices found for the selected period.</td></tr>`
                     );
                 }
             },
             error: function () {
                 tr.next().remove();
                 tr.after(
-                    `<tr class="expanded-row bg-light"><td colspan="5" class="text-center p-3 text-danger">Error loading data.</td></tr>`
+                    `<tr class="expanded-row bg-light"><td colspan="7" class="text-center p-3 text-danger">Error loading data.</td></tr>`
                 );
             },
         });
