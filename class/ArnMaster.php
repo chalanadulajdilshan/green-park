@@ -1,3 +1,4 @@
+
 <?php
 
 class ArnMaster
@@ -185,7 +186,30 @@ class ArnMaster
     public function getByArnId($arn_id)
     {
         $query = "
-        SELECT ai.*,im.*, im.code AS item_code, im.name AS item_name, im.id AS item_id
+        SELECT 
+            ai.id,
+            ai.arn_id,
+            ai.item_code AS item_code_id,
+            ai.order_qty,
+            ai.received_qty,
+            ai.discount_1,
+            ai.discount_2,
+            ai.discount_3,
+            ai.discount_4,
+            ai.discount_5,
+            ai.discount_6,
+            ai.discount_7,
+            ai.discount_8,
+            ai.final_cost,
+            ai.unit_total,
+            ai.list_price,
+            ai.invoice_price,
+            ai.year,
+            ai.created_at,
+            ai.is_cancelled,
+            im.code AS item_code,
+            im.name AS item_name,
+            im.id AS item_id
         FROM arn_items ai
         LEFT JOIN item_master im ON ai.item_code = im.id
         WHERE ai.arn_id = '{$arn_id}'
@@ -324,3 +348,4 @@ class ArnMaster
         return $array_res;
     }
 }
+

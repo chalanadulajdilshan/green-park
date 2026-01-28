@@ -238,6 +238,15 @@ class ItemMaster
                 $row['stock_tmp'][$key]['list_price'] = $stockRow['list_price'];
                 $row['stock_tmp'][$key]['invoice_price'] = $stockRow['invoice_price'];
 
+                // Fetch year from arn_items for this ARN and item
+                $arnItemYear = null;
+                $arnItemQuery = "SELECT `year` FROM `arn_items` WHERE `arn_id` = '" . (int)$stockRow['arn_id'] . "' AND `item_code` = '" . (int)$row['id'] . "' LIMIT 1";
+                $arnItemResult = $db->readQuery($arnItemQuery);
+                if ($arnItemResult && $arnItemRow = mysqli_fetch_assoc($arnItemResult)) {
+                    $arnItemYear = $arnItemRow['year'];
+                }
+                $row['stock_tmp'][$key]['year'] = $arnItemYear;
+
                 // Department
                 $DEPARTMENT_MASTER = new DepartmentMaster($stockRow['department_id']);
                 $departmentName = $DEPARTMENT_MASTER ? $DEPARTMENT_MASTER->name : null;
