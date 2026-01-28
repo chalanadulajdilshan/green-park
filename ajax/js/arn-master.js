@@ -1464,8 +1464,4 @@ jQuery(document).ready(function () {
         // Show after values are set; the modal's shown.bs.modal handler will reset rows
         $modal.modal("show");
     });
-
-
-
-
 });

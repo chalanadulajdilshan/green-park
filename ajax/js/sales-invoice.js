@@ -221,7 +221,7 @@ jQuery(document).ready(function () {
             firstActiveAssigned = true;
             $("#available_qty").val(remainingQty);
           } else {
-            rowClass = "disabled-arn";
+            rowClass = "";  // All ARNs with qty are now clickable
           }
 
           tbody += `
@@ -229,7 +229,8 @@ jQuery(document).ready(function () {
                         data-arn-index="${i}" 
                         data-qty="${totalQty}" 
                         data-used="${usedQty}" 
-                        data-arn-id="${arnId}">
+                        data-arn-id="${arnId}"
+                        data-year="${row.year || ''}">
                         
                         <td colspan="1" style="width: 15%;"><strong>ARN:</strong> ${arnId}
                         
@@ -246,12 +247,12 @@ jQuery(document).ready(function () {
                             <div>${row.department}</div>
                         </td>
                         
-                        <td style="width: 15%;">
+                        <td style="width: 12%;">
                             <div><strong>Available Qty:</strong></div>
                             <div class="arn-qty">${remainingQty}</div> 
                         </td>
                     
-                        <td style="width: 15%;">
+                        <td style="width: 12%;">
                             <div><strong>List Price:</strong></div>
                             <div class='text-danger'><b>${Number(
             item.list_price
@@ -260,7 +261,7 @@ jQuery(document).ready(function () {
           })}</b></div>
                         </td>
                     
-                        <td style="width: 15%;">
+                        <td style="width: 12%;">
                             <div><strong>Sales Price:</strong></div>
                             <div class='text-danger'><b>${Number(
             item.invoice_price
@@ -269,7 +270,12 @@ jQuery(document).ready(function () {
           })}</b></div>
                         </td>
                     
-                        <td colspan="2">${row.created_at}</td>
+                        <td style="width: 8%;">
+                            <div><strong>Year:</strong></div>
+                            <div class='text-primary'><b>${row.year || '-'}</b></div>
+                        </td>
+
+                        <td>${row.created_at}</td>
                     </tr>`;
         });
       });
@@ -561,8 +567,8 @@ jQuery(document).ready(function () {
 
   //GET DATA ARN VISE
   $(document).on("click", ".arn-row", function () {
-    if ($(this).hasClass("disabled-arn") || $(this).hasClass("used-arn")) {
-      return;
+    if ($(this).hasClass("used-arn")) {
+      return;  // Only skip used (zero qty) ARNs
     }
 
     // Deselect others
