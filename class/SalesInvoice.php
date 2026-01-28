@@ -765,4 +765,65 @@ class SalesInvoice
 
         return $array_res;
     }
+    
+    public function getBrandWiseSales($fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT 
+                    b.id AS brand_id,
+                    b.name AS brand_name, 
+                    SUM(sii.total) AS total_sales 
+                  FROM sales_invoice_items sii 
+                  JOIN sales_invoice si ON si.id = sii.invoice_id 
+                  JOIN item_master im ON im.id = sii.item_code 
+                  JOIN brands b ON b.id = im.brand 
+                  WHERE si.invoice_date BETWEEN '$fromDate' AND '$toDate' 
+                  AND si.is_cancel = 0 
+                  GROUP BY b.id 
+                  ORDER BY total_sales DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+
+    public function getInvoicesByBrand($brandId, $fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $brandId = (int)$brandId;
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT 
+                    si.id, 
+                    si.invoice_date, 
+                    si.invoice_no, 
+                    si.customer_name, 
+                    SUM(sii.total) as brand_total
+                  FROM sales_invoice_items sii
+                  JOIN sales_invoice si ON si.id = sii.invoice_id
+                  JOIN item_master im ON im.id = sii.item_code
+                  WHERE im.brand = $brandId
+                  AND si.invoice_date BETWEEN '$fromDate' AND '$toDate'
+                  AND si.is_cancel = 0
+                  GROUP BY si.id
+                  ORDER BY si.invoice_date DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
 }
