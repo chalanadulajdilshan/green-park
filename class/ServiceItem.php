@@ -8,7 +8,7 @@ class ServiceItem
     public $cost;
     public $selling_price;
     public $qty; 
- 
+
     // Constructor: Fetch a service item by ID
     public function __construct($id = null)
     {

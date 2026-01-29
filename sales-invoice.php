@@ -304,7 +304,12 @@ include './auth.php';
                                                     </select>
                                                 </div>
                                             </div>
-                                                <input type="hidden" id="wheel_balancer_commission" name="wheel_balancer_commission" value="0.00">
+                                            <div class="col-md-1">
+                                                <label for="wheel_balancer_commission" class="form-label">Commission</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="number" step="0.01" id="wheel_balancer_commission" name="wheel_balancer_commission" class="form-control" placeholder="0.00" value="0.00">
+                                                </div>
+                                            </div>
 
                                             <div class="col-md-2">
                                                 <label for="isVatInvoice" class="form-label">VAT Invoice</label>

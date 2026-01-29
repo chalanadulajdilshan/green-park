@@ -1467,23 +1467,29 @@ jQuery(document).ready(function () {
 
     // Check if Wheel Balancer is required (for SI/0006 or SI/0007)
     let isBalancerRequired = false;
+    let totalWheelBalancerCommission = 0;
+
     items.forEach(function (item) {
       if (item.code === "SI/0006" || item.code === "SI/0007") {
         isBalancerRequired = true;
+        // Add quantity to total commission
+        const qty = parseFloat(item.qty) || 0;
+        totalWheelBalancerCommission += qty;
       }
     });
 
     // Validate Wheel Balancer
     const wheelBalancerId = $("#wheel_balancer_id").val();
     if (isBalancerRequired && !wheelBalancerId) {
-      $("#wheel_balancer_id").focus();
-      return swal({
-        title: "Error!",
-        text: "Please select a Wheel Balancer (Required for SI/0006 or SI/0007 items).",
+      swal({
+        title: "Validation Error",
+        text: "Please select a Wheel Balancer for wheel alignment/balancing items.",
         type: "error",
         timer: 3000,
         showConfirmButton: false,
       });
+      $("#create_invoice").prop("disabled", false);
+      return;
     }
 
     const formData = new FormData($("#form-data")[0]);
@@ -1493,7 +1499,7 @@ jQuery(document).ready(function () {
       $('input[name="payment_type"]:checked').val()
     );
     formData.append("wheel_balancer_id", wheelBalancerId);
-    formData.append("wheel_balancer_commission", $("#wheel_balancer_commission").val() || 0);
+    formData.set("wheel_balancer_commission", totalWheelBalancerCommission);
     formData.append("customer_id", $("#customer_id").val());
     formData.append("customer_name", $("#customer_name").val());
     formData.append("customer_mobile", $("#customer_mobile").val());
@@ -2189,7 +2195,6 @@ jQuery(document).ready(function () {
     let subTotal = 0;
     let discountTotal = 0;
     let taxTotal = 0;
-    let totalCommission = 0;
 
     // Check if VAT is applied
     const isVatApplied = $("#is_vat_invoice").is(":checked");
@@ -2233,22 +2238,6 @@ jQuery(document).ready(function () {
         );
       }
 
-      // Calculate VAT only if VAT is applied and it's not a service
-      if (isVatApplied && vatPercentage > 0 && !isService) {
-        const discountedItemTotal = itemTotal - itemDiscount;
-        itemTax = discountedItemTotal * (vatPercentage / 100);
-        console.log(
-          "Item Tax:",
-          itemTax,
-          "for discounted total:",
-          discountedItemTotal
-        );
-      }
-
-      // Sum up commission
-      const itemCommission = parseFloat($(this).find('input[name="commission[]"]').val()) || 0;
-      totalCommission += itemCommission;
-
       // Update per-item VAT display
       $(this).find(".item-vat").text(itemTax.toFixed(2));
 
@@ -2256,9 +2245,6 @@ jQuery(document).ready(function () {
       discountTotal += itemDiscount;
       taxTotal += itemTax;
     });
-
-    // Update hidden field for total commission
-    $("#wheel_balancer_commission").val(totalCommission.toFixed(2));
 
     console.log("Final Tax Total:", taxTotal);
 
