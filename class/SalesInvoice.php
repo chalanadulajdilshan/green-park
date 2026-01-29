@@ -33,6 +33,7 @@ class SalesInvoice
     public $is_vat;
     public $wheel_balancer_id;
     public $wheel_balancer_commission;
+    public $wheel_service_commission;
     public $vehicle_meter;
 
     // Constructor to initialize the SalesInvoice object with an ID
@@ -75,6 +76,8 @@ class SalesInvoice
                 $this->is_vat = $result['is_vat'] ?? 0;
                 $this->wheel_balancer_id = $result['wheel_balancer_id'];
                 $this->wheel_balancer_commission = $result['wheel_balancer_commission'];
+                $this->wheel_balancer_commission = $result['wheel_balancer_commission'];
+                $this->wheel_service_commission = $result['wheel_service_commission'] ?? 0;
                 $this->vehicle_meter = $result['vehicle_meter'];
             }
         }
@@ -86,11 +89,12 @@ class SalesInvoice
         $query = "INSERT INTO `sales_invoice` (
             `ref_id`,`invoice_type`,`invoice_no`, `invoice_date`, `company_id`, `customer_id`, `customer_name`, `customer_mobile`, `customer_address`, `customer_vehicle_no`, `recommended_person`, `department_id`, 
             `sale_type`, `discount_type`,`final_cost`, `payment_type`, `sub_total`, `discount`, 
-            `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`, `is_vat`, `wheel_balancer_id`, `wheel_balancer_commission`, `vehicle_meter`
+
+            `tax`, `grand_total`, `outstanding_settle_amount`, `remark`, `credit_period`, `due_date`, `is_vat`, `wheel_balancer_id`, `wheel_balancer_commission`, `wheel_service_commission`, `vehicle_meter`
         ) VALUES (
             '{$this->ref_id}','{$this->invoice_type}', '{$this->invoice_no}', '{$this->invoice_date}', '{$this->company_id}', '{$this->customer_id}', '{$this->customer_name}', '{$this->customer_mobile}', '{$this->customer_address}', '{$this->customer_vehicle_no}', '{$this->recommended_person}', '{$this->department_id}', 
             '{$this->sale_type}', '{$this->discount_type}', '{$this->final_cost}','{$this->payment_type}', '{$this->sub_total}', '{$this->discount}', 
-            '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}', '{$this->is_vat}', '{$this->wheel_balancer_id}', '{$this->wheel_balancer_commission}', '{$this->vehicle_meter}'
+            '{$this->tax}', '{$this->grand_total}', '{$this->outstanding_settle_amount}', '{$this->remark}', '{$this->credit_period}', '{$this->due_date}', '{$this->is_vat}', '{$this->wheel_balancer_id}', '{$this->wheel_balancer_commission}', '{$this->wheel_service_commission}', '{$this->vehicle_meter}'
         )";
 
 
@@ -130,7 +134,9 @@ class SalesInvoice
             `tax` = '{$this->tax}', 
             `grand_total` = '{$this->grand_total}', 
             `remark` = '{$this->remark}',
-            `is_vat` = '{$this->is_vat}'
+            `remark` = '{$this->remark}',
+            `is_vat` = '{$this->is_vat}',
+            `wheel_service_commission` = '{$this->wheel_service_commission}'
             WHERE `id` = '{$this->id}'";
 
         $db = Database::getInstance();
@@ -766,6 +772,46 @@ class SalesInvoice
         return $array_res;
     }
     
+    public function getWheelServiceCommissionTotals($fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT SUM(wheel_service_commission) as total_commission 
+                  FROM `sales_invoice` 
+                  WHERE is_cancel = 0 
+                  AND invoice_date BETWEEN '$fromDate' AND '$toDate'";
+
+        $result = $db->readQuery($query);
+        $row = mysqli_fetch_array($result);
+
+        return $row['total_commission'] ? $row['total_commission'] : 0;
+    }
+
+    public function getInvoicesWithServiceCommission($fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT id, invoice_no, invoice_date, customer_name, grand_total, wheel_service_commission 
+                  FROM `sales_invoice` 
+                  WHERE is_cancel = 0 
+                  AND wheel_service_commission > 0
+                  AND invoice_date BETWEEN '$fromDate' AND '$toDate'
+                  ORDER BY invoice_date DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+
     public function getBrandWiseSales($fromDate, $toDate)
     {
         $db = Database::getInstance();
@@ -815,6 +861,72 @@ class SalesInvoice
                   AND si.invoice_date BETWEEN '$fromDate' AND '$toDate'
                   AND si.is_cancel = 0
                   GROUP BY si.id
+                  ORDER BY si.invoice_date DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+
+    public function getServiceProfitReport($fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT 
+                    sii.service_item_id,
+                    sii.item_code,
+                    sii.service_item_code,
+                    sii.item_name,
+                    SUM(sii.quantity) as total_qty,
+                    SUM(sii.total) as total_earned
+                  FROM `sales_invoice_items` sii
+                  JOIN `sales_invoice` si ON si.id = sii.invoice_id
+                  WHERE si.invoice_date BETWEEN '$fromDate' AND '$toDate'
+                  AND sii.service_item_id != '0' 
+                  AND si.is_cancel = 0
+                  GROUP BY sii.service_item_id
+                  ORDER BY total_earned DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            // Clean item name (remove |ARN:... and |DEPT:...)
+            $parts = explode('|', $row['item_name']);
+            $row['item_name'] = trim($parts[0]);
+            
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+
+    public function getServiceInvoiceDetails($serviceItemId, $fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+        $serviceItemId = $db->escapeString($serviceItemId);
+
+        $query = "SELECT 
+                    si.id,
+                    si.invoice_no,
+                    si.invoice_date,
+                    si.customer_name,
+                    sii.quantity,
+                    sii.total
+                  FROM `sales_invoice_items` sii
+                  JOIN `sales_invoice` si ON si.id = sii.invoice_id
+                  WHERE si.invoice_date BETWEEN '$fromDate' AND '$toDate'
+                  AND sii.service_item_id = '$serviceItemId'
+                  AND si.is_cancel = 0
                   ORDER BY si.invoice_date DESC";
 
         $result = $db->readQuery($query);

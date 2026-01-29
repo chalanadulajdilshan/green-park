@@ -102,11 +102,21 @@ $service_id = 'S/0' . ($lastId + 1);
                                             </div>
 
                                             <!-- Service Name -->
-                                            <div class="col-md-7">
+                                            <div class="col-md-5">
                                                 <label class="form-label" for="service_name">Service Name</label>
                                                 <div class="input-group mb-3">
                                                     <input id="service_name" name="service_name" type="text" class="form-control"
                                                         placeholder="Enter Service Name">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label class="form-label" for="category">Category</label>
+                                                <div class="input-group mb-3">
+                                                    <select id="category" name="category" class="form-select">
+                                                        <option value="2">Other Adjustment</option>
+                                                        <option value="1">Wheel Adjustment</option>
+                                                    </select>
                                                 </div>
                                             </div>
 
@@ -161,6 +171,7 @@ $service_id = 'S/0' . ($lastId + 1);
                                         <tr class="select-service"
                                             data-id="<?php echo $service['id']; ?>"
                                             data-name="<?php echo htmlspecialchars($service['service_name']); ?>"
+                                            data-category="<?php echo $service['category']; ?>"
                                             data-price="<?php echo $service['service_price']; ?>">
                                             <td><?php echo $key; ?></td>
                                             <td><?php echo htmlspecialchars($service['service_name']); ?></td>

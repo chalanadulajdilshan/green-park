@@ -1302,6 +1302,7 @@ jQuery(document).ready(function () {
       const current_km = $(this).find('input[name="current_km[]"]').val() || "";
       const next_service_days =
         $(this).find('input[name="next_service_days[]"]').val() || "";
+      const commission = parseFloat($(this).find('input[name="commission[]"]').val()) || 0;
 
       if (code && !isNaN(totalItem) && item_id) {
         items.push({
@@ -1320,6 +1321,7 @@ jQuery(document).ready(function () {
           vehicle_no,
           current_km,
           next_service_days,
+          commission: commission,
         });
       }
     });
@@ -1463,17 +1465,31 @@ jQuery(document).ready(function () {
       return false;
     }
 
+    // Check if Wheel Balancer is required (for SI/0006 or SI/0007)
+    let isBalancerRequired = false;
+    let totalWheelBalancerCommission = 0;
+
+    items.forEach(function (item) {
+      if (item.code === "SI/0006" || item.code === "SI/0007") {
+        isBalancerRequired = true;
+        // Add quantity to total commission
+        const qty = parseFloat(item.qty) || 0;
+        totalWheelBalancerCommission += qty;
+      }
+    });
+
     // Validate Wheel Balancer
     const wheelBalancerId = $("#wheel_balancer_id").val();
-    if (!wheelBalancerId) {
-      $("#wheel_balancer_id").focus();
-      return swal({
-        title: "Error!",
-        text: "Please select a Wheel Balancer.",
+    if (isBalancerRequired && !wheelBalancerId) {
+      swal({
+        title: "Validation Error",
+        text: "Please select a Wheel Balancer for wheel alignment/balancing items.",
         type: "error",
         timer: 3000,
         showConfirmButton: false,
       });
+      $("#create_invoice").prop("disabled", false);
+      return;
     }
 
     const formData = new FormData($("#form-data")[0]);
@@ -1483,7 +1499,7 @@ jQuery(document).ready(function () {
       $('input[name="payment_type"]:checked').val()
     );
     formData.append("wheel_balancer_id", wheelBalancerId);
-    formData.append("wheel_balancer_commission", $("#wheel_balancer_commission").val() || 0);
+    formData.set("wheel_balancer_commission", totalWheelBalancerCommission);
     formData.append("customer_id", $("#customer_id").val());
     formData.append("customer_name", $("#customer_name").val());
     formData.append("customer_mobile", $("#customer_mobile").val());
@@ -1980,7 +1996,19 @@ jQuery(document).ready(function () {
     // If both service (SV/) and service item (SI/) are selected, create TWO separate rows
     if (hasService && hasServiceItem) {
       // --- ROW 1: Service (SV/) ---
+
+      // Calculate Commission
+      const selectedServiceOption = $("#service option:selected");
+      const serviceCategory = selectedServiceOption.data('category');
+      let serviceCommission = 0;
       const serviceTotal = (price - discount) * qty;
+
+      if (serviceCategory == 1) {
+        serviceCommission = 200;
+      } else if (serviceCategory == 2) {
+        serviceCommission = serviceTotal / 3;
+      }
+
       const serviceRow = `
             <tr>
                 <td>${code}
@@ -1992,6 +2020,7 @@ jQuery(document).ready(function () {
                     <input type="hidden" name="vehicle_no[]" value="${vehicleNo}">
                     <input type="hidden" name="current_km[]" value="${currentKm}">
                     <input type="hidden" name="next_service_days[]" value="${nextServiceDays}">
+                    <input type="hidden" name="commission[]" value="${serviceCommission.toFixed(2)}">
                 </td>
                 <td>${name}</td>
                 <td class="item-price">${price.toFixed(2)}</td>
@@ -2031,6 +2060,7 @@ jQuery(document).ready(function () {
                     <input type="hidden" name="vehicle_no[]" value="">
                     <input type="hidden" name="current_km[]" value="">
                     <input type="hidden" name="next_service_days[]" value="">
+                    <input type="hidden" name="commission[]" value="0">
                 </td>
                 <td>${serviceItemName}</td>
                 <td class="item-price">${serviceItemUnitPrice.toFixed(2)}</td>
@@ -2068,6 +2098,18 @@ jQuery(document).ready(function () {
         total = netUnitPrice * qty;
       }
 
+      // Calculate Commission for Single Row (Service Only)
+      let rowCommission = 0;
+      if (hasService) {
+        const selectedServiceOption = $("#service option:selected");
+        const serviceCategory = selectedServiceOption.data('category');
+        if (serviceCategory == 1) {
+          rowCommission = 200;
+        } else if (serviceCategory == 2) {
+          rowCommission = total / 3;
+        }
+      }
+
       const row = `
             <tr>
                 <td>${code}
@@ -2079,6 +2121,7 @@ jQuery(document).ready(function () {
                     <input type="hidden" name="vehicle_no[]" value="${vehicleNo}">
                     <input type="hidden" name="current_km[]" value="${currentKm}">
                     <input type="hidden" name="next_service_days[]" value="${nextServiceDays}">
+                    <input type="hidden" name="commission[]" value="${rowCommission.toFixed(2)}">
                 </td>
                 <td>${displayName}</td>
                 <td class="item-price">${displayPrice.toFixed(2)}</td>

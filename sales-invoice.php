@@ -441,7 +441,7 @@ include './auth.php';
                                                         $SERVICE = new Service(NULL);
                                                         foreach ($SERVICE->all() as $service) {
                                                         ?>
-                                                            <option value="<?php echo $service['id'] ?>">
+                                                            <option value="<?php echo $service['id'] ?>" data-category="<?php echo $service['category']; ?>">
                                                                 <?php echo $service['service_name'] ?>
                                                             </option>
                                                         <?php } ?>

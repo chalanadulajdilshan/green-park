@@ -2,7 +2,7 @@ jQuery(document).ready(function () {
 
     // Create Service Item
     $("#create").click(function (event) {
-        
+
         event.preventDefault();
 
         // Validation
@@ -191,7 +191,7 @@ jQuery(document).ready(function () {
     });
 
     // Dynamic qty calculation
-    $('#adjust_qty').on('input', function() {
+    $('#adjust_qty').on('input', function () {
         var current = parseFloat($('#current_qty').val()) || 0;
         var adjust = parseFloat($(this).val()) || 0;
         var new_qty = current + adjust;

@@ -158,6 +158,7 @@ jQuery(document).ready(function () {
         $('#service_id').val($(this).data('id'));
         $('#service_name').val($(this).data('name'));
         $('#service_price').val($(this).data('price'));
+        $('#category').val($(this).data('category'));
 
         $("#create-service").hide();
         $("#update-service").show();

@@ -208,6 +208,7 @@ if (isset($_POST['create'])) {
     $totalDiscount = 0;
     $taxableAmount = 0;
     $final_cost = 0;
+    $totalServiceCommission = 0;
 
     // Calculate subtotal and discount
     foreach ($items as $item) {
@@ -257,6 +258,11 @@ if (isset($_POST['create'])) {
         if (substr($item['code'], 0, 2) !== 'SI' && substr($item['code'], 0, 2) !== 'SV') {
             $taxableAmount += ($itemTotal - $discount_amount);
         }
+
+        // Sum up total service commission
+        if (isset($item['commission'])) {
+            $totalServiceCommission += (float)$item['commission'];
+        }
     }
     $netTotal = $totalSubTotal - $totalDiscount;
 
@@ -298,6 +304,7 @@ if (isset($_POST['create'])) {
     $SALES_INVOICE->wheel_balancer_commission = isset($_POST['wheel_balancer_commission']) ? $_POST['wheel_balancer_commission'] : 0;
     $SALES_INVOICE->sale_type = $_POST['sales_type'];
     $SALES_INVOICE->final_cost = $final_cost;
+    $SALES_INVOICE->wheel_service_commission = $totalServiceCommission;
 
     $SALES_INVOICE->payment_type = $paymentType;
     $SALES_INVOICE->sub_total = $totalSubTotal;
@@ -414,6 +421,7 @@ if (isset($_POST['create'])) {
             $SALES_ITEM->vehicle_no = isset($item['vehicle_no']) ? $item['vehicle_no'] : '';
             $SALES_ITEM->current_km = isset($item['current_km']) ? $item['current_km'] : '';
             $SALES_ITEM->next_service_date = (isset($item['next_service_days']) && !empty($item['next_service_days']) && intval($item['next_service_days']) > 0) ? date('Y-m-d', strtotime($SALES_INVOICE->invoice_date . ' + ' . $item['next_service_days'] . ' days')) : null;
+            $SALES_ITEM->commission = isset($item['commission']) ? $item['commission'] : 0;
             $SALES_ITEM->created_at = date("Y-m-d H:i:s");
             $SALES_ITEM->create();
 

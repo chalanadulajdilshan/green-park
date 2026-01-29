@@ -2,16 +2,13 @@
 <?php
 include 'class/include.php';
 include './auth.php';
-
-$WHEEL_BALANCER = new WheelBalancer(NULL);
-$balancers = $WHEEL_BALANCER->getActiveWheelBalancers();
 ?>
 
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
-    <title>Wheel Balancer Report | <?php echo $COMPANY_PROFILE_DETAILS->name ?> </title>
+    <title>Wheel Service Commission Report | <?php echo $COMPANY_PROFILE_DETAILS->name ?> </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="<?php echo $COMPANY_PROFILE_DETAILS->name ?>" name="author" />
     <!-- include main CSS -->
@@ -38,11 +35,11 @@ $balancers = $WHEEL_BALANCER->getActiveWheelBalancers();
                     <div class="row">
                         <div class="col-12">
                             <div class="page-title-box d-flex align-items-center justify-content-between">
-                                <h4 class="mb-0">Wheel Balancer Report</h4>
+                                <h4 class="mb-0">Wheel Service Commission Report</h4>
                                 <div class="page-title-right">
                                     <ol class="breadcrumb m-0">
                                         <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
-                                        <li class="breadcrumb-item active">Wheel Balancer Report</li>
+                                        <li class="breadcrumb-item active">Wheel Service Commission Report</li>
                                     </ol>
                                 </div>
                             </div>
@@ -64,45 +61,45 @@ $balancers = $WHEEL_BALANCER->getActiveWheelBalancers();
                                         </div>
                                     </div>
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th style="width: 50px;">#</th>
-                                                    <th>Code</th>
-                                                    <th>Name</th>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card bg-primary text-white-50">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-start">
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <h5 class="text-white font-size-15 text-truncate">Total Commission</h5>
+                                                            <h3 class="text-white mb-0" id="total-commission-display">0.00</h3>
+                                                        </div>
+                                                        <div class="flex-shrink-0 align-self-end">
+                                                            <i class="uil uil-money-bill text-white font-size-24"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                                    <th>Total Commission</th>
-
-                                                    <th style="width: 100px;">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                if (count($balancers) > 0) {
-                                                    foreach ($balancers as $key => $wb) {
-                                                ?>
-                                                        <tr class="balancer-row" data-id="<?php echo $wb['id']; ?>">
-                                                            <td><?php echo $key + 1; ?></td>
-                                                            <td><?php echo $wb['code']; ?></td>
-                                                            <td><?php echo $wb['name']; ?></td>
-
-                                                            <td class="total-commission" data-id="<?php echo $wb['id']; ?>">0.00</td>
-
-                                                            <td>
-                                                                <button type="button" class="btn btn-sm btn-primary btn-expand" title="View Invoices">
-                                                                    <i class="uil uil-plus"></i> View
-                                                                </button>
-                                                            </td>
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-striped mb-0" id="invoice-table">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Date</th>
+                                                            <th>Invoice No</th>
+                                                            <th>Customer</th>
+                                                            <th class="text-end">Amount</th>
+                                                            <th class="text-end">Commission</th>
+                                                            <th>Action</th>
                                                         </tr>
-                                                <?php
-                                                    }
-                                                } else {
-                                                    echo '<tr><td colspan="5" class="text-center">No Wheel Balancers Found</td></tr>';
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Data will be populated via AJAX -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -128,7 +125,7 @@ $balancers = $WHEEL_BALANCER->getActiveWheelBalancers();
     <!-- Standard Scripts -->
     <?php include 'main-js.php' ?>
     <script src="assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
-    <script src="ajax/js/wheel-balancer-report.js"></script>
+    <script src="ajax/js/wheel-service-commission-report.js"></script>
 
 </body>
 
