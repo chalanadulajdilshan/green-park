@@ -6,6 +6,7 @@ class Service
     public $service_code;
     public $service_name;
     public $service_price;
+    public $category;
 
     // Constructor: Fetch a service by ID
     public function __construct($id = null)
@@ -20,6 +21,7 @@ class Service
                 $this->service_code = $result['service_code'];
                 $this->service_name = $result['service_name'];
                 $this->service_price = $result['service_price'];
+                $this->category = $result['category'];
             }
         }
     }
@@ -27,8 +29,8 @@ class Service
     // Create a new service
     public function create()
     {
-        $query = "INSERT INTO `service` (`service_code`, `service_name`, `service_price`) 
-                  VALUES ('" . $this->service_code . "', '" . $this->service_name . "', '" . $this->service_price . "')";
+        $query = "INSERT INTO `service` (`service_code`, `service_name`, `service_price`, `category`) 
+                  VALUES ('" . $this->service_code . "', '" . $this->service_name . "', '" . $this->service_price . "', '" . $this->category . "')";
         $db = Database::getInstance();
         $result = $db->readQuery($query);
 
@@ -44,7 +46,8 @@ class Service
     {
         $query = "UPDATE `service` SET 
                     `service_name` = '" . $this->service_name . "',
-                    `service_price` = '" . $this->service_price . "'
+                    `service_price` = '" . $this->service_price . "',
+                    `category` = '" . $this->category . "'
                   WHERE `id` = '" . $this->id . "'";
         $db = Database::getInstance();
         $result = $db->readQuery($query);

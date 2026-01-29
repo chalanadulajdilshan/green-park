@@ -826,4 +826,70 @@ class SalesInvoice
 
         return $array_res;
     }
+
+    public function getServiceProfitReport($fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+
+        $query = "SELECT 
+                    sii.service_item_id,
+                    sii.item_code,
+                    sii.service_item_code,
+                    sii.item_name,
+                    SUM(sii.quantity) as total_qty,
+                    SUM(sii.total) as total_earned
+                  FROM `sales_invoice_items` sii
+                  JOIN `sales_invoice` si ON si.id = sii.invoice_id
+                  WHERE si.invoice_date BETWEEN '$fromDate' AND '$toDate'
+                  AND sii.service_item_id != '0' 
+                  AND si.is_cancel = 0
+                  GROUP BY sii.service_item_id
+                  ORDER BY total_earned DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            // Clean item name (remove |ARN:... and |DEPT:...)
+            $parts = explode('|', $row['item_name']);
+            $row['item_name'] = trim($parts[0]);
+            
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
+
+    public function getServiceInvoiceDetails($serviceItemId, $fromDate, $toDate)
+    {
+        $db = Database::getInstance();
+        $fromDate = $db->escapeString($fromDate);
+        $toDate = $db->escapeString($toDate);
+        $serviceItemId = $db->escapeString($serviceItemId);
+
+        $query = "SELECT 
+                    si.id,
+                    si.invoice_no,
+                    si.invoice_date,
+                    si.customer_name,
+                    sii.quantity,
+                    sii.total
+                  FROM `sales_invoice_items` sii
+                  JOIN `sales_invoice` si ON si.id = sii.invoice_id
+                  WHERE si.invoice_date BETWEEN '$fromDate' AND '$toDate'
+                  AND sii.service_item_id = '$serviceItemId'
+                  AND si.is_cancel = 0
+                  ORDER BY si.invoice_date DESC";
+
+        $result = $db->readQuery($query);
+        $array_res = array();
+
+        while ($row = mysqli_fetch_array($result)) {
+            array_push($array_res, $row);
+        }
+
+        return $array_res;
+    }
 }

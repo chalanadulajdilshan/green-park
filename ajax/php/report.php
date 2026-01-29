@@ -19,6 +19,40 @@ if (isset($_POST['action']) && $_POST['action'] == 'loard_price_Control') {
 }
 
 //profit table load
+if (isset($_POST['action']) && $_POST['action'] === 'load_service_profit_report') {
+    $from_date = $_POST['from_date'] ?? '';
+    $to_date = $_POST['to_date'] ?? '';
+
+    if (empty($from_date) || empty($to_date)) {
+        echo json_encode(['error' => 'Date range is required']);
+        exit;
+    }
+
+    $salesInvoice = new SalesInvoice(NULL);
+    $reportData = $salesInvoice->getServiceProfitReport($from_date, $to_date);
+
+    echo json_encode($reportData);
+    exit;
+}
+
+if (isset($_POST['action']) && $_POST['action'] === 'load_service_invoice_details') {
+    $service_item_id = $_POST['service_item_id'] ?? '';
+    $from_date = $_POST['from_date'] ?? '';
+    $to_date = $_POST['to_date'] ?? '';
+
+    if (empty($service_item_id) || empty($from_date) || empty($to_date)) {
+        echo json_encode(['error' => 'Missing parameters']);
+        exit;
+    }
+
+    $salesInvoice = new SalesInvoice(NULL);
+    $details = $salesInvoice->getServiceInvoiceDetails($service_item_id, $from_date, $to_date);
+
+    echo json_encode($details);
+    exit;
+}
+
+//profit table load
 if (isset($_POST['action']) && $_POST['action'] === 'load_profit_report') {
     // Collect filters into an array
     $filters = [

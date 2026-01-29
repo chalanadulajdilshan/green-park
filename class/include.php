@@ -81,6 +81,7 @@ include_once(dirname(__FILE__) . '/ServiceType.php');
 include_once(dirname(__FILE__) . '/VehicleService.php');
 include_once(dirname(__FILE__) . '/ServiceAppointment.php');
 include_once(dirname(__FILE__) . '/WheelBalancer.php');
+include_once(dirname(__FILE__) . '/ServiceIncome.php');
 
 
 // Initialize session if not already started
